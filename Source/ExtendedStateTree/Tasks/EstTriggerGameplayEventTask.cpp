@@ -1,14 +1,16 @@
 ﻿// SPDX-FileCopyrightText: 2025 NTY.studio
 
-#include "ExtendedStateTree/Tasks/EstTriggerGameplayEventTask.h"
+#include "EstTriggerGameplayEventTask.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "StateTreeExecutionContext.h"
 
-#include "ExtendedStateTree/ExtendedStateTree.h"
 #include "ExtendedStateTree/EstUtils.h"
+#include "ExtendedStateTree/ExtendedStateTree.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(EstTriggerGameplayEventTask)
 
 EStateTreeRunStatus FEstTriggerGameplayEventTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
@@ -55,13 +57,14 @@ bool FEstTriggerGameplayEventTask::SendGameplayEvent(FGameplayEventData const& E
 	}
 	return ValidActors.Num() > 0;
 }
-
+#if WITH_EDITOR
 FText FEstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const
 {
 	FString Out = TEXT("<s>Trigger Gameplay Event</s> ");
 	FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>();
 	if (Data->bUseEnterGameplayEvent)
 	{
+		FString EnterGameplayEventTag = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, EnterGameplayEvent)), Formatting).ToString();
 		Out += FString::Printf(TEXT("%s %s "), *UEstUtils::SymbolStateEnter, *Data->EnterGameplayEvent.EventTag.ToString());
 		if (Data->EnterGameplayEvent.Target)
 		{
@@ -86,3 +89,4 @@ FText FEstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDa
 	}
 	return UEstUtils::FormatDescription(Out, Formatting);
 }
+#endif

@@ -6,8 +6,10 @@
 #include "AbilitySystemGlobals.h"
 #include "StateTreeExecutionContext.h"
 
-#include "ExtendedStateTree/ExtendedStateTree.h"
 #include "ExtendedStateTree/EstUtils.h"
+#include "ExtendedStateTree/ExtendedStateTree.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(EstForwardGameplayEventToStateTreeTask)
 
 #define LOCTEXT_NAMESPACE "GameplayEventToStateTreeEventTask"
 
@@ -56,7 +58,7 @@ UEstEventBridge* FEstForwardGameplayEventToStateTreeTask::MakeListener(FStateTre
 	Listener = NewObject<UEstEventBridge>();
 	Listener->AddToRoot();
 	FStateTreeEventQueue& EventQueue = Context.GetMutableEventQueue();
-	FString MsgPart = FString::Printf(TEXT("%s. Sending to StateTree %s"), *GetNameSafe(Actor), *GetNameSafe(Context.GetStateTree()));
+	FString MsgPart = FString::Printf(TEXT("%s. Sending → StateTree %s"), *GetNameSafe(Actor), *GetNameSafe(Context.GetStateTree()));
 	Listener->EventReceived.BindWeakLambda(
 		Actor.Get(),
 		[bDebugEnabled = bDebugEnabled, InstanceDataRef = Context.GetInstanceDataStructRef(*this), &EventQueue, Owner = Context.GetOwner(), MsgPart](FGameplayEventData Payload)
@@ -124,7 +126,7 @@ void FEstForwardGameplayEventToStateTreeTask::ExitState(FStateTreeExecutionConte
 		Listener = nullptr;
 	}
 }
-
+#if WITH_EDITOR
 FText FEstForwardGameplayEventToStateTreeTask::GetDescription(
 	FGuid const& ID,
 	FStateTreeDataView const InstanceDataView,
@@ -132,12 +134,13 @@ FText FEstForwardGameplayEventToStateTreeTask::GetDescription(
 	EStateTreeNodeFormatting const Formatting
 ) const
 {
-	auto const* Data = InstanceDataView.GetPtr<FInstanceDataType>();
+	auto const ActorName = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, Actor)), Formatting).ToString();
+	auto const TagName = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, EventTag)), Formatting).ToString();
 	return UEstUtils::FormatDescription(
-		FString::Printf(TEXT("%s<s>Gameplay -> StateTree Event:</s> %s"), *UEstUtils::SymbolTaskContinuous, *Data->EventTag.ToString()),
+		FString::Printf(TEXT("%s<s>Gameplay → StateTree Event:</s> %s <s>on</s> %s"), *UEstUtils::SymbolTaskContinuous, *TagName, *ActorName),
 		Formatting
 	);
 }
-
+#endif
 
 #undef LOCTEXT_NAMESPACE

@@ -1,6 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
-#include "EstChangeInputConfigSubsytem.h"
+#include "EstChangeInputConfigSubsystem.h"
 
 #include "TimerManager.h"
 
@@ -10,6 +10,10 @@
 #include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
+
+#include "ExtendedStateTree/ExtendedStateTree.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(EstChangeInputConfigSubsystem)
 
 DEFINE_LOG_CATEGORY(LogEstChangeInputConfigSubsystem)
 
@@ -23,17 +27,32 @@ FString LexToStringOptionalHandle(TOptional<FGuid> const& Guid)
 
 UEstChangeInputConfigSubsystem* UEstChangeInputConfigSubsystem::Get(ULocalPlayer const* LocalPlayer)
 {
-	return LocalPlayer ? LocalPlayer->GetSubsystem<UEstChangeInputConfigSubsystem>() : nullptr;
+	return IsValid(LocalPlayer) ? LocalPlayer->GetSubsystem<UEstChangeInputConfigSubsystem>() : nullptr;
 }
 
 UEstChangeInputConfigSubsystem* UEstChangeInputConfigSubsystem::Get(APlayerController const* PC)
 {
-	return Get(PC ? PC->GetLocalPlayer() : nullptr);
+	return Get(IsValid(PC) ? PC->GetLocalPlayer() : nullptr);
+}
+
+void UEstChangeInputConfigSubsystem::Deinitialize()
+{
+	if (auto const World = GetWorld())
+	{
+		World->GetTimerManager().ClearAllTimersForObject(this);
+	}
+	InputConfigHandleStack.Empty();
+	InputConfigs.Empty();
+	CurrentInputConfigHandle.Reset();
+	OnInputConfigEnqueued.Clear();
+	OnInputConfigChanged.Clear();
+	EnqueuedInputConfigs.Empty();
+	Super::Deinitialize();
 }
 
 TOptional<FEstInputModeConfig> UEstChangeInputConfigSubsystem::GetInputConfig(TOptional<FGuid> const& InputConfigHandle) const
 {
-	if (!InputConfigHandle.IsSet()) { return {}; }
+	if (!InputConfigHandle.IsSet()) return {};
 	FGuid const Key = InputConfigHandle.GetValue();
 	if (!InputConfigs.Contains(Key))
 	{
@@ -42,6 +61,13 @@ TOptional<FEstInputModeConfig> UEstChangeInputConfigSubsystem::GetInputConfig(TO
 		return {};
 	}
 	return InputConfigs[Key];
+}
+
+FString UEstChangeInputConfigSubsystem::DescribeHandle(TOptional<FGuid> InputConfigHandle) const
+{
+	auto const InputConfig = GetInputConfig(InputConfigHandle);
+	if (!InputConfig.IsSet()) return TEXT("None");
+	return UEnum::GetDisplayValueAsText(InputConfig->InputMode).ToString();
 }
 
 FGuid UEstChangeInputConfigSubsystem::PushInputConfig(FEstInputModeConfig const& InputConfig)
@@ -56,10 +82,7 @@ FGuid UEstChangeInputConfigSubsystem::PushInputConfig(FEstInputModeConfig const&
 
 void UEstChangeInputConfigSubsystem::PopInputConfig(FGuid const& InputConfigHandle)
 {
-	if (!ensure(InputConfigHandleStack.Contains(InputConfigHandle)))
-	{
-		return;
-	}
+	if (!ensure(InputConfigHandleStack.Contains(InputConfigHandle))) return;
 	EnqueuedInputConfigs.Remove(InputConfigHandle);
 	InputConfigHandleStack.Remove(InputConfigHandle);
 	ensure(InputConfigs.Contains(InputConfigHandle));
@@ -69,27 +92,20 @@ void UEstChangeInputConfigSubsystem::PopInputConfig(FGuid const& InputConfigHand
 
 TOptional<FGuid> UEstChangeInputConfigSubsystem::PeekInputConfigStack() const
 {
-	if (!InputConfigHandleStack.Num())
-	{
-		return {};
-	}
+	if (!InputConfigHandleStack.Num()) return {};
 	return InputConfigHandleStack.Last();
 }
 
 TOptional<FEstInputModeConfig> UEstChangeInputConfigSubsystem::GetCurrentInputConfig() const
 {
-	if (!CurrentInputConfigHandle.IsSet() || !InputConfigs.Contains(CurrentInputConfigHandle.GetValue()))
-	{
-		return {};
-	}
+	if (!CurrentInputConfigHandle.IsSet() || !InputConfigs.Contains(CurrentInputConfigHandle.GetValue())) return {};
 	return InputConfigs[CurrentInputConfigHandle.GetValue()];
 }
 
 void UEstChangeInputConfigSubsystem::ScheduleUpdate()
 {
-	CICS_LOG(Log, TEXT("ScheduleUpdate"));
-	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
-	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UEstChangeInputConfigSubsystem::Update);
+	if (GetWorld()->GetTimerManager().IsTimerActive(UpdateHandle)) return;
+	UpdateHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UEstChangeInputConfigSubsystem::Update);
 }
 
 void UEstChangeInputConfigSubsystem::ApplyInputConfigFromHandle(TOptional<FGuid> InputConfigHandle)
@@ -101,16 +117,15 @@ void UEstChangeInputConfigSubsystem::ApplyInputConfigFromHandle(TOptional<FGuid>
 	if (CurrentInputConfigHandle == InputConfigHandle) { return; } // already applied
 	auto InputConfig = GetInputConfig(InputConfigHandle);
 	CICS_LOG(
-		Log,
-		TEXT("Changing Input Config %s: %s <- %s"),
-		InputConfig ? *UEnum::GetDisplayValueAsText(InputConfig->InputMode).ToString() : TEXT("None"),
-		*LexToStringOptionalHandle(CurrentInputConfigHandle),
-		*LexToStringOptionalHandle(InputConfigHandle)
+		Verbose,
+		TEXT("ApplyInputConfigFromHandle: Changing Input Config: %s <- %s"),
+		*DescribeHandle(InputConfigHandle),
+		*DescribeHandle(CurrentInputConfigHandle)
 	);
 	CurrentInputConfigHandle = InputConfigHandle;
 	if (!InputConfig)
 	{
-		CICS_LOG(Log, TEXT("Empty Input Config"));
+		CICS_LOG(Log, TEXT("ApplyInputConfigFromHandle: Empty Input Config"));
 		return;
 	}
 	// // prevent reporting as enqueued
@@ -149,36 +164,23 @@ void UEstChangeInputConfigSubsystem::ApplyInputConfigFromHandle(TOptional<FGuid>
 		}
 		default:
 		{
-			CICS_LOG(Error, TEXT("Unknown InputMode %s"), *UEnum::GetDisplayValueAsText(InputConfig->InputMode).ToString());
+			CICS_LOG(Error, TEXT("ApplyInputConfigFromHandle: Unknown InputMode %s"), *UEnum::GetDisplayValueAsText(InputConfig->InputMode).ToString());
 		}
 	}
 }
 
 void UEstChangeInputConfigSubsystem::Update()
 {
-	CICS_LOG(Log, TEXT("Update"));
 	auto const PreviousInputConfigHandle = CurrentInputConfigHandle;
-	CICS_LOG(Log, TEXT("Previous Input Config %s Index %d"), *LexToStringOptionalHandle(PreviousInputConfigHandle), InputConfigHandleStack.IndexOfByKey(PreviousInputConfigHandle));
-	CICS_LOG(Log, TEXT("Input Config Stack %s"), *FString::JoinBy(InputConfigHandleStack, TEXT(", "), [](FGuid const& Handle) { return Handle.ToString(); }));
 	ApplyInputConfigFromHandle(PeekInputConfigStack());
 	ensure(CurrentInputConfigHandle == PeekInputConfigStack());
 
-	CICS_LOG(Log, TEXT("Applied Input Config %s"), *LexToStringOptionalHandle(CurrentInputConfigHandle));
-	CICS_LOG(Log, TEXT("Input Config Stack %s"), *FString::JoinBy(InputConfigHandleStack, TEXT(", "), [](FGuid const& Handle) { return Handle.ToString(); }));
-	//~ Report input configs that won't be applied, but are enqueued
+	ensure(CurrentInputConfigHandle.IsSet() || EnqueuedInputConfigs.Num() == 0); // shouldn't have enqueued configs if we're not applying anything
+	auto CurrentEnqueuedInputConfigs = EnqueuedInputConfigs;
+	EnqueuedInputConfigs.Reset();
+	for (auto const InputConfigHandle : CurrentEnqueuedInputConfigs)
 	{
-		if (EnqueuedInputConfigs.Num() > 0)
-		{
-			CICS_LOG(Log, TEXT("Enqueued %d Input Configs"), EnqueuedInputConfigs.Num());
-		}
-		ensure(CurrentInputConfigHandle.IsSet() || EnqueuedInputConfigs.Num() == 0); // shouldn't have enqueued configs if we're not applying anything
-		auto LastEnqueuedInputConfigs = EnqueuedInputConfigs;
-		EnqueuedInputConfigs.Reset();
-		for (auto const InputConfigHandle : LastEnqueuedInputConfigs)
-		{
-			CICS_LOG(Log, TEXT("Enqueued Input Config %s"), *InputConfigHandle.ToString());
-			ensure(GetInputConfig(InputConfigHandle).IsSet());
-			OnInputConfigEnqueued.Broadcast(InputConfigHandle);
-		}
+		ensure(GetInputConfig(InputConfigHandle).IsSet());
+		OnInputConfigEnqueued.Broadcast(InputConfigHandle);
 	}
 }

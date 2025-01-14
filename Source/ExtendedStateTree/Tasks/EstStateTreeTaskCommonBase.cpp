@@ -1,3 +1,5 @@
 ﻿// SPDX-FileCopyrightText: 2025 NTY.studio
 
-#include "ExtendedStateTree/Tasks/EstStateTreeTaskCommonBase.h"
+#include "EstStateTreeTaskCommonBase.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(EstStateTreeTaskCommonBase)

@@ -27,7 +27,7 @@ public:
 	FGameplayEventReceivedDelegate EventReceived;
 };
 
-USTRUCT(BlueprintType, meta=(HiddenByDefault))
+USTRUCT(BlueprintType, meta=(Hidden))
 struct FEstForwardGameplayEventToStateTreeData
 {
 	GENERATED_BODY()
@@ -54,20 +54,22 @@ struct FEstForwardGameplayEventToStateTreeData
  * Re-emits Ability System gameplay events from target actor as StateTree events.
  * Useful to set as a global task.
  */
-USTRUCT(BlueprintType, DisplayName="Gameplay -> StateTree Event (new) [EST]", meta=(Category="Events"))
+USTRUCT(BlueprintType, DisplayName="Gameplay → StateTree Event [EST]", meta=(Category="Events"))
 struct EXTENDEDSTATETREE_API FEstForwardGameplayEventToStateTreeTask : public FEstStateTreeTaskCommonBase
 {
 	GENERATED_BODY()
 
 public:
-
 	using FInstanceDataType = FEstForwardGameplayEventToStateTreeData;
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual EDataValidationResult Compile(FStateTreeDataView InstanceDataView, TArray<FText>& ValidationMessages) override;
 
+protected:
+	UEstEventBridge* MakeListener(FStateTreeExecutionContext const& Context) const;
 
+public:
 #if WITH_EDITOR
 	virtual FText GetDescription(
 		FGuid const& ID,
@@ -78,16 +80,7 @@ public:
 
 	virtual FName GetIconName() const override
 	{
-		return FName("EnhancedInputEditor|ClassIcon.InputAction");
-	}
-
-	virtual FColor GetIconColor() const override
-	{
-		return UE::StateTree::Colors::Grey;
+		return FName("EditorStyle|ClassIcon.K2Node_Event");
 	}
 #endif
-
-protected:
-	UEstEventBridge* MakeListener(FStateTreeExecutionContext const& Context) const;
 };
-

@@ -6,6 +6,8 @@
 #include "StateTreePropertyFunctionBase.h"
 #include "EstPropertyFunctions.generated.h"
 
+//~ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Property Function Data ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ //
+
 USTRUCT(meta = (Hidden))
 struct EXTENDEDSTATETREE_API FEstIntCombinationPropertyFunctionInstanceData
 {
@@ -70,6 +72,9 @@ struct EXTENDEDSTATETREE_API FEstObjectFunctionInstanceData
 
 	UPROPERTY(EditAnywhere, Category = Output)
 	bool Result = false;
+
+	UPROPERTY(EditAnywhere, Category = Parameter)
+	bool bInvert = false;
 };
 
 USTRUCT(meta = (Hidden))
@@ -96,11 +101,19 @@ struct EXTENDEDSTATETREE_API FEstBoolToStringFunctionInstanceData
 	FString Result = TEXT("");
 };
 
-/**
- * 
+USTRUCT(meta=(Hidden, DisplayName = "Property Function Base [EST]"))
+struct EXTENDEDSTATETREE_API FEstPropertyFunctionBase : public FStateTreePropertyFunctionCommonBase
+{
+	GENERATED_BODY()
+};
+
+//~ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ Property Functions ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ //
+
+/*
+ * Generate a random float between Left and Right
  */
 USTRUCT(meta=(DisplayName = "Random Float [EST]", Category = "Math|Float"))
-struct EXTENDEDSTATETREE_API FEstRandomFloatPropertyFunction : public FStateTreePropertyFunctionCommonBase
+struct EXTENDEDSTATETREE_API FEstRandomFloatPropertyFunction : public FEstPropertyFunctionBase
 {
 	GENERATED_BODY()
 
@@ -115,8 +128,11 @@ struct EXTENDEDSTATETREE_API FEstRandomFloatPropertyFunction : public FStateTree
 #endif
 };
 
+/*
+ * Generate a random integer between Left and Right
+ */
 USTRUCT(meta=(DisplayName = "Random Integer [EST]", Category = "Math|Integer"))
-struct EXTENDEDSTATETREE_API FEstRandomIntPropertyFunction : public FStateTreePropertyFunctionCommonBase
+struct EXTENDEDSTATETREE_API FEstRandomIntPropertyFunction : public FEstPropertyFunctionBase
 {
 	GENERATED_BODY()
 
@@ -131,8 +147,11 @@ struct EXTENDEDSTATETREE_API FEstRandomIntPropertyFunction : public FStateTreePr
 #endif
 };
 
+/*
+ * Convert an FString to an FText
+ */
 USTRUCT(meta=(DisplayName = "String To Text [EST]", Category = "Object"))
-struct EXTENDEDSTATETREE_API FEstStringToTextPropertyFunction : public FStateTreePropertyFunctionCommonBase
+struct EXTENDEDSTATETREE_API FEstStringToTextPropertyFunction : public FEstPropertyFunctionBase
 {
 	GENERATED_BODY()
 
@@ -147,8 +166,11 @@ struct EXTENDEDSTATETREE_API FEstStringToTextPropertyFunction : public FStateTre
 #endif
 };
 
+/*
+ * Convert a bool to a string
+ */
 USTRUCT(meta=(DisplayName = "Bool To String [EST]", Category = "Object"))
-struct EXTENDEDSTATETREE_API FEstBoolToStringPropertyFunction : public FStateTreePropertyFunctionCommonBase
+struct EXTENDEDSTATETREE_API FEstBoolToStringPropertyFunction : public FEstPropertyFunctionBase
 {
 	GENERATED_BODY()
 
@@ -163,9 +185,12 @@ struct EXTENDEDSTATETREE_API FEstBoolToStringPropertyFunction : public FStateTre
 #endif
 };
 
-// Same as built-in ObjectIsValid, but with fixed description when inverted
+/*
+ * Check if an object is valid
+ * Same as built-in ObjectIsValid, but with fixed description when inverted
+ */
 USTRUCT(meta=(DisplayName = "Object Is Valid [EST]", Category = "Object"))
-struct EXTENDEDSTATETREE_API FEstObjectIsValidPropertyFunction : public FStateTreePropertyFunctionCommonBase
+struct EXTENDEDSTATETREE_API FEstObjectIsValidPropertyFunction : public FEstPropertyFunctionBase
 {
 	GENERATED_BODY()
 
@@ -174,9 +199,6 @@ struct EXTENDEDSTATETREE_API FEstObjectIsValidPropertyFunction : public FStateTr
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 
 	virtual void Execute(FStateTreeExecutionContext& Context) const override;
-
-	UPROPERTY(EditAnywhere, Category = Parameter)
-	bool bInvert = false;
 
 #if WITH_EDITOR
 	virtual FText GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const override;

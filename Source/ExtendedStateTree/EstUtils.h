@@ -30,29 +30,29 @@ public:
 	static FString ReplaceRichText(FString const& String, EStateTreeNodeFormatting const Formatting)
 	{
 		auto const BaseString = String
-		                        .Replace(TEXT("STT_"), TEXT(""))
-		                        .Replace(TEXT("STT"), TEXT(""));
+			.Replace(TEXT("STT_"), TEXT(""))
+			.Replace(TEXT("STT"), TEXT(""));
 		if (Formatting == RichText)
 		{
 			// fix up rich text, named closing tags are not supported
 			return BaseString
-			       .Replace(TEXT("</b>"), TEXT("</>"))
-			       .Replace(TEXT("</s>"), TEXT("</>"));
+				.Replace(TEXT("</b>"), TEXT("</>"))
+				.Replace(TEXT("</s>"), TEXT("</>"));
 		}
 
 		if (!BaseString.Contains(TEXT("</s>")) && !BaseString.Contains(TEXT("</b>")))
 		{
 			// probably already formatted
 			return BaseString
-			       .Replace(TEXT("<s>"), TEXT(""))
-			       .Replace(TEXT("<b>"), TEXT(""))
-			       .Replace(TEXT("</>"), TEXT(""));
+				.Replace(TEXT("<s>"), TEXT(""))
+				.Replace(TEXT("<b>"), TEXT(""))
+				.Replace(TEXT("</>"), TEXT(""));
 		}
 		return BaseString
-		       .Replace(TEXT("<s>"), TEXT(""))
-		       .Replace(TEXT("<b>"), TEXT("\""))
-		       .Replace(TEXT("</s>"), TEXT(""))
-		       .Replace(TEXT("</b>"), TEXT("\""));
+			.Replace(TEXT("<s>"), TEXT(""))
+			.Replace(TEXT("<b>"), TEXT("\""))
+			.Replace(TEXT("</s>"), TEXT(""))
+			.Replace(TEXT("</b>"), TEXT("\""));
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateTree")
@@ -68,7 +68,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateTree")
-	static bool GetStateName(UStateTree* Tree, FStateTreeStateHandle const& StateHandle, FName& OutName)
+	static bool GetStateName(UStateTree const* Tree, FStateTreeStateHandle const& StateHandle, FName& OutName)
 	{
 		OutName = NAME_None;
 		if (!StateHandle.IsValid())
@@ -92,7 +92,7 @@ public:
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateTree")
-	static FGameplayTag GetStateTag(UStateTree* Tree, FStateTreeStateHandle const& StateHandle)
+	static FGameplayTag GetStateTag(UStateTree const* Tree, FStateTreeStateHandle const& StateHandle)
 	{
 		if (!StateHandle.IsValid()) { return FGameplayTag::EmptyTag; }
 		if (!IsValid(Tree)) { return FGameplayTag::EmptyTag; }

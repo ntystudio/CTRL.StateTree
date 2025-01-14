@@ -8,7 +8,11 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(EstPropertyFunctions)
+
 #define LOCTEXT_NAMESPACE "ExtendedStateTree"
+
+//~ ━━━━━━━━━━━━━━━━━━━━━━━━ FEstRandomFloatPropertyFunction ━━━━━━━━━━━━━━━━━━━━━━━━━ //
 
 void FEstRandomFloatPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
@@ -26,6 +30,9 @@ FText FEstRandomFloatPropertyFunction::GetDescription(
 {
 	return UE::StateTree::DescHelpers::GetDescriptionForMathOperation<FInstanceDataType>(LOCTEXT("FloatRandom", "Random Float"), ID, InstanceDataView, BindingLookup, Formatting);
 }
+#endif
+
+//~ ━━━━━━━━━━━━━━━━━━━━━━━━━ FEstRandomIntPropertyFunction ━━━━━━━━━━━━━━━━━━━━━━━━━━ //
 
 void FEstRandomIntPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
@@ -34,6 +41,7 @@ void FEstRandomIntPropertyFunction::Execute(FStateTreeExecutionContext& Context)
 	InstanceData.Result = FMath::RandRange(Left, Right);
 }
 
+#if WITH_EDITOR
 FText FEstRandomIntPropertyFunction::GetDescription(
 	FGuid const& ID,
 	FStateTreeDataView const InstanceDataView,
@@ -43,6 +51,9 @@ FText FEstRandomIntPropertyFunction::GetDescription(
 {
 	return UE::StateTree::DescHelpers::GetDescriptionForMathOperation<FInstanceDataType>(LOCTEXT("IntRandom", "Random Int"), ID, InstanceDataView, BindingLookup, Formatting);
 }
+#endif
+
+//~ ━━━━━━━━━━━━━━━━━━━━━━━━ FEstStringToTextPropertyFunction ━━━━━━━━━━━━━━━━━━━━━━━━ //
 
 void FEstStringToTextPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
@@ -51,6 +62,7 @@ void FEstStringToTextPropertyFunction::Execute(FStateTreeExecutionContext& Conte
 	Result = FText::FromString(Input);
 }
 
+#if WITH_EDITOR
 FText FEstStringToTextPropertyFunction::GetDescription(
 	FGuid const& ID,
 	FStateTreeDataView const InstanceDataView,
@@ -68,6 +80,9 @@ FText FEstStringToTextPropertyFunction::GetDescription(
 
 	return UE::StateTree::DescHelpers::GetSingleParamFunctionText(LOCTEXT("StringToText", "String To Text"), InputValue, Formatting);
 }
+#endif
+
+//~ ━━━━━━━━━━━━━━━━━━━━━━━━ FEstBoolToStringPropertyFunction ━━━━━━━━━━━━━━━━━━━━━━━━ //
 
 void FEstBoolToStringPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
@@ -76,6 +91,7 @@ void FEstBoolToStringPropertyFunction::Execute(FStateTreeExecutionContext& Conte
 	Result = LexToString(Input);
 }
 
+#if WITH_EDITOR
 FText FEstBoolToStringPropertyFunction::GetDescription(
 	FGuid const& ID,
 	FStateTreeDataView const InstanceDataView,
@@ -93,14 +109,18 @@ FText FEstBoolToStringPropertyFunction::GetDescription(
 
 	return UE::StateTree::DescHelpers::GetSingleParamFunctionText(LOCTEXT("BoolToString", "Bool To String"), InputValue, Formatting);
 }
+#endif
+
+//~ ━━━━━━━━━━━━━━━━━━━━━━━ FEstObjectIsValidPropertyFunction ━━━━━━━━━━━━━━━━━━━━━━━━ //
 
 void FEstObjectIsValidPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	auto& [Left, Result] = InstanceData;
+	auto& [Left, Result, bInvert] = InstanceData;
 	InstanceData.Result = IsValid(Left) != bInvert;
 }
 
+#if WITH_EDITOR
 FText FEstObjectIsValidPropertyFunction::GetDescription(
 	FGuid const& ID,
 	FStateTreeDataView const InstanceDataView,
@@ -108,7 +128,8 @@ FText FEstObjectIsValidPropertyFunction::GetDescription(
 	EStateTreeNodeFormatting const Formatting
 ) const
 {
-	auto const InvertText = UE::StateTree::DescHelpers::GetInvertText(bInvert, Formatting);
+	auto const Data = InstanceDataView.Get<FInstanceDataType>();
+	auto const InvertText = UE::StateTree::DescHelpers::GetBoolText(Data.bInvert, Formatting);
 	auto const DescText = UE::StateTree::DescHelpers::GetDescriptionForSingleParameterFunc<FInstanceDataType>(
 		LOCTEXT("ObjectIsValid", "Object Is Valid"),
 		ID,
@@ -118,7 +139,7 @@ FText FEstObjectIsValidPropertyFunction::GetDescription(
 	);
 	return FText::Format(LOCTEXT("ObjectIsValidDesc", "{Invert}{Desc}"), InvertText, DescText);
 }
+#endif
 
-#endif // WITH_EDITOR
 #undef LOCTEXT_NAMESPACE
 

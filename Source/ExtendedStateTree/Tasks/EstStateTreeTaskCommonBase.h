@@ -11,7 +11,7 @@
  * This allows schemas to safely include all tasks child of this struct. 
  */
 USTRUCT(BlueprintType, meta = (Hidden))
-struct FEstStateTreeTaskCommonBase: public FStateTreeTaskCommonBase
+struct FEstStateTreeTaskCommonBase : public FStateTreeTaskCommonBase
 {
 	GENERATED_BODY()
 
@@ -21,7 +21,18 @@ struct FEstStateTreeTaskCommonBase: public FStateTreeTaskCommonBase
 		bShouldCallTick = false;
 		bShouldStateChangeOnReselect = false;
 	}
-	
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bDebugEnabled = false;
+
+#if WITH_EDITOR
+	virtual FColor GetIconColor() const override
+	{
+		return UE::StateTree::Colors::Grey;
+	}
+	virtual FName GetIconName() const override
+	{
+		return FName("StateTreeEditorStyle|Node.Text");
+	}
+#endif
 };

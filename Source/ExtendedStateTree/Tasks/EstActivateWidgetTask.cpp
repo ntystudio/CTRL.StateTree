@@ -18,12 +18,6 @@ EStateTreeRunStatus FEstActivateWidgetTask::EnterState(FStateTreeExecutionContex
 		return EStateTreeRunStatus::Failed;
 	}
 	SetWidgetActivationState(Data.ActivatableWidget, Data.bTargetActivationState);
-	// auto EnableTickFn = [this](UCommonActivatableWidget* InWidget)
-	// {
-	// 	
-	// };
-	// Data.OnActivatedHandle = Data.ActivatableWidget->OnActivated().AddLambda(EnableTickFn);
-	// Data.OnDeactivatedHandle = Data.ActivatableWidget->OnDeactivated().AddLambda(EnableTickFn);
 	return EStateTreeRunStatus::Running;
 }
 
@@ -32,8 +26,6 @@ void FEstActivateWidgetTask::ExitState(FStateTreeExecutionContext& Context, FSta
 	auto& Data = Context.GetInstanceData<FEstActivateWidgetTaskData>(*this);
 	if (IsValid(Data.ActivatableWidget))
 	{
-		// Data.ActivatableWidget->OnActivated().Remove(Data.OnActivatedHandle);
-		// Data.ActivatableWidget->OnDeactivated().Remove(Data.OnDeactivatedHandle);
 		if (Data.bInvertTargetActivationStateOnExit)
 		{
 			SetWidgetActivationState(Data.ActivatableWidget, !Data.bTargetActivationState);
@@ -71,7 +63,7 @@ void FEstActivateWidgetTask::SetWidgetActivationState(UCommonActivatableWidget* 
 		ActivatableWidget->DeactivateWidget();
 	}
 }
-
+#if WITH_EDITOR
 FText FEstActivateWidgetTask::GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const
 {
 	FInstanceDataType const* InstanceData = InstanceDataView.GetPtr<FInstanceDataType>();
@@ -85,3 +77,4 @@ FText FEstActivateWidgetTask::GetDescription(FGuid const& ID, FStateTreeDataView
 	}
 	return UEstUtils::FormatDescription(FString::Join(Result, TEXT(" ")), Formatting);
 }
+#endif

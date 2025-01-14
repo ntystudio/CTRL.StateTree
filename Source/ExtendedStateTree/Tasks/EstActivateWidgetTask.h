@@ -37,7 +37,7 @@ struct FEstActivateWidgetTaskData
 /**
  * Activates or deactivates a widget based on the target activation state.
  */
-USTRUCT(BlueprintType, meta=(Category="UI"))
+USTRUCT(BlueprintType, DisplayName="Activate Widget [EST]", meta=(Category="UI"))
 struct FEstActivateWidgetTask : public FEstStateTreeTaskCommonBase
 {
 	GENERATED_BODY()
@@ -63,12 +63,7 @@ struct FEstActivateWidgetTask : public FEstStateTreeTaskCommonBase
 
 	virtual FName GetIconName() const override
 	{
-		return FName("EnhancedInputEditor|ClassIcon.InputAction");
-	}
-
-	virtual FColor GetIconColor() const override
-	{
-		return UE::StateTree::Colors::Grey;
+		return FName("WidgetReflectorStyleStyle|WidgetReflector.TabIcon");
 	}
 #endif
 };

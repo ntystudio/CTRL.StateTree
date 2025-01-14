@@ -13,7 +13,7 @@
 
 #include "Subsystems/LocalPlayerSubsystem.h"
 
-#include "EstChangeInputConfigSubsytem.generated.h"
+#include "EstChangeInputConfigSubsystem.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogEstChangeInputConfigSubsystem, Log, All);
 
@@ -172,14 +172,13 @@ struct FEstInputModeConfig
 /*
  * Manages a stack of input configs for a player controller.
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, DisplayName="Input Config Subsystem [EST]")
 class EXTENDEDSTATETREE_API UEstChangeInputConfigSubsystem : public ULocalPlayerSubsystem
 {
 	GENERATED_BODY()
 
 public:
 	static UEstChangeInputConfigSubsystem* Get(ULocalPlayer const* LocalPlayer);
-
 	static UEstChangeInputConfigSubsystem* Get(APlayerController const* PC);
 
 	UPROPERTY(BlueprintReadOnly, VisibleAnywhere)
@@ -201,6 +200,7 @@ public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FInputConfigEnqueuedDelegate, FGuid);
 	FInputConfigEnqueuedDelegate OnInputConfigEnqueued;
 
+public:
 	// Push the specified input config onto the stack. Queues an update.
 	FGuid PushInputConfig(FEstInputModeConfig const& InputConfig);
 
@@ -214,8 +214,13 @@ public:
 	// Peek at the top of the input config stack
 	TOptional<FGuid> PeekInputConfigStack() const;
 
+	FString DescribeHandle(TOptional<FGuid> InputConfigHandle) const;
+
+	virtual void Deinitialize() override;
+
 protected:
 	void ScheduleUpdate();
 	void Update();
 	void ApplyInputConfigFromHandle(TOptional<FGuid> InputConfigHandle);
+	FTimerHandle UpdateHandle;
 };

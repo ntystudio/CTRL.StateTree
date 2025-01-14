@@ -4,7 +4,7 @@
 #include "StateTreeConditionBase.h"
 
 #include "ExtendedStateTree/Tasks/EstStateTreeTaskCommonBase.h"
-#include "ExtendedStateTree/Utils/EstChangeInputConfigSubsytem.h"
+#include "ExtendedStateTree/Utils/EstChangeInputConfigSubsystem.h"
 
 #include "EstChangeInputConfigTask.generated.h"
 
@@ -44,11 +44,6 @@ struct FEstChangeInputConfigTask : public FEstStateTreeTaskCommonBase
 	virtual FName GetIconName() const override
 	{
 		return FName("EnhancedInputEditor|ClassIcon.InputAction");
-	}
-
-	virtual FColor GetIconColor() const override
-	{
-		return UE::StateTree::Colors::Grey;
 	}
 #endif
 };

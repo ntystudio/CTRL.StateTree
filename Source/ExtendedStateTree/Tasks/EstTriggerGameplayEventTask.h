@@ -51,11 +51,7 @@ public:
 	virtual FText GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
 	virtual FName GetIconName() const override
 	{
-		return FName("EnhancedInputEditor|ClassIcon.InputAction");
-	}
-	virtual FColor GetIconColor() const override
-	{
-		return UE::StateTree::Colors::Grey;
+		return FName("EditorStyle|ClassIcon.K2Node_Event");
 	}
 #endif
 	
