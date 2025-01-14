@@ -2,6 +2,9 @@
 
 This plugin adds a range of useful new state tree utility tasks and property functions.
 
+#include "Magitech/Utils/MagitechComputedValue.h"
+
+
 ## Tasks
 
 ### Events
@@ -59,6 +62,27 @@ Useful for logging.
 * Random Float
 * Random Integer
 * Object Is Valid
+
+## Supported Engine Versions
+
+The plugin was developed for Unreal Engine 5.5.1+. It is unlikely to work in versions of Unreal Engine <5.5.0 due to heavy changes in the StateTree plugin. Please let me know if you get it working outside 5.5.1+.
+
+## Installation
+
+The best way is to clone this repository as a submodule; that way you can contribute
+pull requests and more importantly, easily get the latest updates.
+ 
+The project should be placed in your project's `Plugins` folder.
+
+```bash
+cd YourProject
+git submodule add git@github.com:ntystudio/ExtendedStateTree.git Plugins/ExtendedStateTree
+git submodule init
+git submodule update
+git commit -m "Added ExtendedStateTree Plugin as a submodule."
+```
+
+Alternatively you can download the ZIP of this repo and place it in `YourProject/Plugins/`.
 
 ## License
 
