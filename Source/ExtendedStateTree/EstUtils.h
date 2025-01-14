@@ -18,11 +18,12 @@ class EXTENDEDSTATETREE_API UEstUtils : public UBlueprintFunctionLibrary
 
 public:
 	inline static FString SymbolStateEnter = TEXT("<s>↴</s>");
-	inline static FString SymbolStateExit = TEXT("<s>↶</s>");
+	inline static FString SymbolStateExit = TEXT("<s>↵</s>");
 	inline static FString SymbolStateComplete = TEXT("<s>✓</s>");
 	inline static FString SymbolTaskContinuous = TEXT("∞");
 	inline static FString SymbolTaskEndStateOnError = TEXT("✗");
 	inline static FString SymbolTaskEndStateOnDone = TEXT("✓");
+	inline static FString SymbolInvalid = TEXT("🚩");
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateTree")
 	static FString GetEndStateSymbol(bool const bEndsState) { return bEndsState ? SymbolTaskEndStateOnDone : SymbolTaskContinuous; }
@@ -100,4 +101,6 @@ public:
 		if (!State) { return FGameplayTag::EmptyTag; }
 		return State->Tag;
 	}
+	
+	static FStateTreePropertyPath GetStructPropertyPath(FGuid const& ID, FName A, FName B);
 };

@@ -13,7 +13,7 @@ USTRUCT(BlueprintType, meta=(Category="UI"))
 struct FEstActivateWidgetTaskData
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UUserWidget> Widget;
 
@@ -28,12 +28,13 @@ struct FEstActivateWidgetTaskData
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parameter")
 	bool bCompleteOnMatchingActivationState = true;
-	
+
 	FDelegateHandle OnActivatedHandle;
 	FDelegateHandle OnDeactivatedHandle;
 
 	void OnActivationChanged();
 };
+
 /**
  * Activates or deactivates a widget based on the target activation state.
  */
@@ -46,13 +47,16 @@ struct FEstActivateWidgetTask : public FEstStateTreeTaskCommonBase
 	{
 		bShouldCallTick = true;
 	}
+
 	using FInstanceDataType = FEstActivateWidgetTaskData;
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual EStateTreeRunStatus Tick(FStateTreeExecutionContext& Context, float DeltaTime) const override;
 
+protected:
 	static void SetWidgetActivationState(UCommonActivatableWidget* ActivatableWidget, bool bNewActivationState);
+
 #if WITH_EDITOR
 	virtual FText GetDescription(
 		FGuid const& ID,

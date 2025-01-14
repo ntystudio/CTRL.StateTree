@@ -36,9 +36,8 @@ FText FEstRandomFloatPropertyFunction::GetDescription(
 
 void FEstRandomIntPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
-	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	auto& [Left, Right, Result] = InstanceData;
-	InstanceData.Result = FMath::RandRange(Left, Right);
+	auto& [Left, Right, Result] = Context.GetInstanceData(*this);
+	Result = FMath::RandRange(Left, Right);
 }
 
 #if WITH_EDITOR
@@ -57,8 +56,7 @@ FText FEstRandomIntPropertyFunction::GetDescription(
 
 void FEstStringToTextPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
-	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	auto& [Input, Result] = InstanceData;
+	auto& [Input, Result] = Context.GetInstanceData(*this);
 	Result = FText::FromString(Input);
 }
 
@@ -70,24 +68,42 @@ FText FEstStringToTextPropertyFunction::GetDescription(
 	EStateTreeNodeFormatting const Formatting
 ) const
 {
-	FInstanceDataType const& InstanceData = InstanceDataView.Get<FInstanceDataType>();
+	auto const& [Input, Result] = InstanceDataView.Get<FInstanceDataType>();
 
 	FText InputValue = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, Input)), Formatting);
 	if (InputValue.IsEmpty())
 	{
-		InputValue = FText::FromString(InstanceData.Input);
+		InputValue = FText::FromString(Input);
 	}
 
 	return UE::StateTree::DescHelpers::GetSingleParamFunctionText(LOCTEXT("StringToText", "String To Text"), InputValue, Formatting);
 }
 #endif
 
+void FEstStringToNamePropertyFunction::Execute(FStateTreeExecutionContext& Context) const
+{
+	auto& [Input, Result] = Context.GetInstanceData(*this);
+	Result = FName(Input);
+}
+
+FText FEstStringToNamePropertyFunction::GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const
+{
+	auto const& [Input, Result] = InstanceDataView.Get<FInstanceDataType>();
+
+	FText InputValue = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, Input)), Formatting);
+	if (InputValue.IsEmpty())
+	{
+		InputValue = FText::FromString(Input);
+	}
+
+	return UE::StateTree::DescHelpers::GetSingleParamFunctionText(LOCTEXT("StringToName", "String To Text"), InputValue, Formatting);
+}
+
 //~ ━━━━━━━━━━━━━━━━━━━━━━━━ FEstBoolToStringPropertyFunction ━━━━━━━━━━━━━━━━━━━━━━━━ //
 
 void FEstBoolToStringPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
-	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	auto& [Input, Result] = InstanceData;
+	auto& [Input, Result] = Context.GetInstanceData(*this);
 	Result = LexToString(Input);
 }
 
@@ -99,12 +115,12 @@ FText FEstBoolToStringPropertyFunction::GetDescription(
 	EStateTreeNodeFormatting const Formatting
 ) const
 {
-	FInstanceDataType const& InstanceData = InstanceDataView.Get<FInstanceDataType>();
+	auto const& [Input, Result] = InstanceDataView.Get<FInstanceDataType>();
 
 	FText InputValue = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, Input)), Formatting);
 	if (InputValue.IsEmpty())
 	{
-		InputValue = FText::FromString(LexToString(InstanceData.Input));
+		InputValue = FText::FromString(LexToString(Input));
 	}
 
 	return UE::StateTree::DescHelpers::GetSingleParamFunctionText(LOCTEXT("BoolToString", "Bool To String"), InputValue, Formatting);
@@ -115,9 +131,8 @@ FText FEstBoolToStringPropertyFunction::GetDescription(
 
 void FEstObjectIsValidPropertyFunction::Execute(FStateTreeExecutionContext& Context) const
 {
-	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	auto& [Left, Result, bInvert] = InstanceData;
-	InstanceData.Result = IsValid(Left) != bInvert;
+	auto& [Left, Result, bInvert] = Context.GetInstanceData(*this);
+	Result = IsValid(Left) != bInvert;
 }
 
 #if WITH_EDITOR
@@ -142,4 +157,3 @@ FText FEstObjectIsValidPropertyFunction::GetDescription(
 #endif
 
 #undef LOCTEXT_NAMESPACE
-

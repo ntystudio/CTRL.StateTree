@@ -90,6 +90,18 @@ struct EXTENDEDSTATETREE_API FEstStringToTextFunctionInstanceData
 };
 
 USTRUCT(meta = (Hidden))
+struct EXTENDEDSTATETREE_API FEstStringToNameFunctionInstanceData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = Parameter)
+	FString Input = TEXT("");
+
+	UPROPERTY(EditAnywhere, Category = Output)
+	FName Result = NAME_None;
+};
+
+USTRUCT(meta = (Hidden))
 struct EXTENDEDSTATETREE_API FEstBoolToStringFunctionInstanceData
 {
 	GENERATED_BODY()
@@ -156,6 +168,25 @@ struct EXTENDEDSTATETREE_API FEstStringToTextPropertyFunction : public FEstPrope
 	GENERATED_BODY()
 
 	using FInstanceDataType = FEstStringToTextFunctionInstanceData;
+
+	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
+
+	virtual void Execute(FStateTreeExecutionContext& Context) const override;
+
+#if WITH_EDITOR
+	virtual FText GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const override;
+#endif
+};
+
+/*
+ * Convert an FString to an FName
+ */
+USTRUCT(meta=(DisplayName = "String To Name [EST]", Category = "Object"))
+struct EXTENDEDSTATETREE_API FEstStringToNamePropertyFunction : public FEstPropertyFunctionBase
+{
+	GENERATED_BODY()
+
+	using FInstanceDataType = FEstStringToNameFunctionInstanceData;
 
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 

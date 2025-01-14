@@ -35,7 +35,7 @@ void FEstActivateWidgetTask::ExitState(FStateTreeExecutionContext& Context, FSta
 	Data.ActivatableWidget = nullptr;
 }
 
-EStateTreeRunStatus FEstActivateWidgetTask::Tick(FStateTreeExecutionContext& Context, float DeltaTime) const
+EStateTreeRunStatus FEstActivateWidgetTask::Tick(FStateTreeExecutionContext& Context, float const DeltaTime) const
 {
 	Super::Tick(Context, DeltaTime);
 	auto& Data = Context.GetInstanceData<FEstActivateWidgetTaskData>(*this);
@@ -63,13 +63,21 @@ void FEstActivateWidgetTask::SetWidgetActivationState(UCommonActivatableWidget* 
 		ActivatableWidget->DeactivateWidget();
 	}
 }
+
 #if WITH_EDITOR
-FText FEstActivateWidgetTask::GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const
+FText FEstActivateWidgetTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FInstanceDataType const* InstanceData = InstanceDataView.GetPtr<FInstanceDataType>();
 	TArray Result = {FString::Printf(TEXT("%s<s>ActivateWidget</s>"), *UEstUtils::GetEndStateSymbol(InstanceData->bCompleteOnMatchingActivationState))};
 	FText const WidgetBindingText = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, Widget)), Formatting);
-	Result.Add(FString::Printf(TEXT("<b>%s</b>"), *WidgetBindingText.ToString()));
+	if (WidgetBindingText.IsEmpty())
+	{
+		Result.Add(FString::Printf(TEXT("<b>%s Invalid Widget</b>"), *UEstUtils::SymbolInvalid));
+	}
+	else
+	{
+		Result.Add(FString::Printf(TEXT("<b>%s</b>"), *WidgetBindingText.ToString()));
+	}
 	Result.Add(FString::Printf(TEXT("%s<b>%s</b>"), *UEstUtils::SymbolStateEnter, InstanceData->bTargetActivationState ? TEXT("Activate") : TEXT("Deactivate")));
 	if (InstanceData->bInvertTargetActivationStateOnExit)
 	{
