@@ -74,8 +74,6 @@ The project should be placed in your project's `Plugins` folder.
 ```bash
 cd YourProject
 git submodule add git@github.com:ntystudio/ExtendedStateTree.git Plugins/ExtendedStateTree
-git submodule init
-git submodule update
 git commit -m "Added ExtendedStateTree Plugin as a submodule."
 ```
 
