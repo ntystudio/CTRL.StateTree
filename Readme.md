@@ -2,9 +2,6 @@
 
 This plugin adds a range of useful new state tree utility tasks and property functions.
 
-#include "Magitech/Utils/MagitechComputedValue.h"
-
-
 ## Tasks
 
 ### Events
