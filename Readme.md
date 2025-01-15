@@ -82,3 +82,14 @@ Alternatively you can download the ZIP of this repo and place it in `YourProject
 ## License
 
 MIT
+
+----
+
+----
+
+> [!Tip] 
+> # NTY Studio Plugins
+>
+> * [� Unicode Browser](https://github.com/ntystudio/UnicodeBrowser)
+> * [Extended State Tree](https://github.com/ntystudio/ExtendedStateTree)
+> * [Reference Visualizer](https://github.com/ntystudio/CTRL-reference-visualizer)
