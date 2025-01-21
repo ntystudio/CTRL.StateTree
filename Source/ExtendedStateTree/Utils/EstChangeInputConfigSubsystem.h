@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CommonLocalPlayer.h"
 
 #include "Engine/EngineBaseTypes.h"
+#include "Engine/TimerHandle.h"
 
 #include "GenericPlatform/ICursor.h"
 
@@ -15,6 +15,7 @@
 
 #include "EstChangeInputConfigSubsystem.generated.h"
 
+class UUserWidget;
 DECLARE_LOG_CATEGORY_EXTERN(LogEstChangeInputConfigSubsystem, Log, All);
 
 /*
@@ -105,7 +106,7 @@ public:
 	// Convert from EEstMouseCursor to EMouseCursor
 	static EMouseCursor::Type ToMouseCursor(EEstMouseCursor const CursorType)
 	{
-		return EMouseCursor::Type(static_cast<uint8>(CursorType));
+		return static_cast<EMouseCursor::Type>(static_cast<uint8>(CursorType));
 	}
 };
 

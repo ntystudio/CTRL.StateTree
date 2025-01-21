@@ -20,7 +20,6 @@ public class ExtendedStateTree : ModuleRules
 			new string[]
 			{
 				"CoreUObject",
-				"CommonGame",
 				"CommonUI",
 				"Engine",
 				"GameplayTags",
