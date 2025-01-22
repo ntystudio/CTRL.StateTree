@@ -6,6 +6,7 @@
 
 #include "Engine/World.h"
 
+#include "ExtendedStateTree/EstUtils.h"
 #include "ExtendedStateTree/ExtendedStateTree.h"
 
 #include "Kismet/KismetMathLibrary.h"
@@ -13,7 +14,8 @@
 EStateTreeRunStatus FEstSpawnActor::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
-	if (InstanceData.SpawnedActor) {
+	if (InstanceData.SpawnedActor)
+	{
 		return EStateTreeRunStatus::Running;
 	}
 	if (!InstanceData.ActorClass)
@@ -21,7 +23,7 @@ EStateTreeRunStatus FEstSpawnActor::EnterState(FStateTreeExecutionContext& Conte
 		EST_LOG(Error, TEXT("Failed to spawn actor: No Actor Class."));
 		return EStateTreeRunStatus::Failed;
 	}
-	auto World = Context.GetWorld();
+	auto const World = Context.GetWorld();
 	if (!World)
 	{
 		EST_LOG(Error, TEXT("Failed to spawn actor: No World."));
@@ -56,8 +58,18 @@ void FEstSpawnActor::ExitState(FStateTreeExecutionContext& Context, FStateTreeTr
 		SpawnedActor->Destroy();
 	}
 }
-
-FText FEstSpawnActor::GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const
+#if WITH_EDITOR
+FText FEstSpawnActor::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
-	return FEstStateTreeTaskCommonBase::GetDescription(ID, InstanceDataView, BindingLookup, Formatting);
+	FString Out = FString::Printf(TEXT("<s>Spawn Actor</s> %s "), *UEstUtils::SymbolStateEnter);
+	FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>();
+	FText const ActorClassName = GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, ActorClass, Data->ActorClass.Get()->GetDisplayNameText().ToString());
+	auto const DestroyOnExitPath = FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, bDestroyOnExit));
+	auto const DestroyOnExitSource = BindingLookup.GetPropertyBindingSource(DestroyOnExitPath);
+	FText const DestroyOnExit = DestroyOnExitSource ? BindingLookup.GetBindingSourceDisplayName(DestroyOnExitPath, Formatting) : FText::GetEmpty();
+	FString const OnExitString = (DestroyOnExitSource || Data->bDestroyOnExit) ? FString::Printf(TEXT(" %s Destroy %s"), *UEstUtils::SymbolStateExit, *DestroyOnExit.ToString()) : FString();
+	FText const LocationText = GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, SpawnLocation, Data->SpawnLocation.ToCompactString());
+	Out = Out.Append(FString::Printf(TEXT("%s <s>at</s> %s %s"), *ActorClassName.ToString(), *LocationText.ToString(), *OnExitString));
+	return UEstUtils::FormatDescription(Out, Formatting);
 }
+#endif

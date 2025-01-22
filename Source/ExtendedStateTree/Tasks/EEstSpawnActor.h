@@ -29,7 +29,7 @@ struct FEstSpawnActorData
 	FRotator SpawnRotation = FRotator::ZeroRotator;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	FVector SpawnScale = FVector::OneVector;;
+	FVector SpawnScale = FVector::OneVector;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	int32 RandomYaw = 0;
@@ -71,7 +71,7 @@ public:
 
 	virtual FName GetIconName() const override
 	{
-		return FName("EditorStyle|Icons.Visibility");
+		return FName("GraphEditor.SpawnActor_16x");
 	}
 
 #endif

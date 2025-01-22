@@ -36,7 +36,7 @@ FText FEstComponentVisibility::GetDescription(FGuid const& ID, FStateTreeDataVie
 	FString Out = TEXT("<s>Set Component Visibility</s> ");
 	FText const SceneComponentName = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, SceneComponent)), Formatting);
 	FText const TargetStateText = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, bTargetVisibility)), Formatting);
-	Out += FString::Printf(TEXT("%s<s>:</s> %s"), *SceneComponentName.ToString(), *TargetStateText.ToString());
+	Out = Out.Append(FString::Printf(TEXT("%s<s>:</s> %s"), *SceneComponentName.ToString(), *TargetStateText.ToString()));
 	return UEstUtils::FormatDescription(Out, Formatting);
 }
 #endif

@@ -10,15 +10,21 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "EstUtils.generated.h"
-
+#define GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, MemberName, DefaultString) \
+([&]() -> FText { \
+auto const Path = FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, MemberName)); \
+auto const Source = BindingLookup.GetPropertyBindingSource(Path); \
+FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>(); \
+return Source ? BindingLookup.GetBindingSourceDisplayName(Path) : FText::FromString(DefaultString); \
+}())
 UCLASS(DisplayName = "StateTree Utils [EST]", ClassGroup=(EST))
 class EXTENDEDSTATETREE_API UEstUtils : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
-	inline static FString SymbolStateEnter = TEXT("<s>↴</s>");
-	inline static FString SymbolStateExit = TEXT("<s>↵</s>");
+	inline static FString SymbolStateEnter = TEXT("<s>↳</s>");
+	inline static FString SymbolStateExit = TEXT("<s>↰</s>");
 	inline static FString SymbolStateComplete = TEXT("<s>✓</s>");
 	inline static FString SymbolTaskContinuous = TEXT("∞");
 	inline static FString SymbolTaskEndStateOnError = TEXT("✗");
