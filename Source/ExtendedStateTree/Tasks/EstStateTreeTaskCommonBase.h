@@ -10,7 +10,7 @@
  * Base class (namespace) for all EST Tasks
  * This allows schemas to safely include all tasks child of this struct. 
  */
-USTRUCT(BlueprintType, meta = (Hidden))
+USTRUCT(BlueprintType, meta = (Hidden, Category="EST"))
 struct FEstStateTreeTaskCommonBase : public FStateTreeTaskCommonBase
 {
 	GENERATED_BODY()
@@ -28,7 +28,7 @@ struct FEstStateTreeTaskCommonBase : public FStateTreeTaskCommonBase
 #if WITH_EDITOR
 	virtual FColor GetIconColor() const override
 	{
-		return UE::StateTree::Colors::Grey;
+		return UE::StateTree::Colors::DarkGreen;
 	}
 	virtual FName GetIconName() const override
 	{

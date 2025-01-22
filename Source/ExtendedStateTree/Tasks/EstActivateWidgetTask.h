@@ -9,7 +9,7 @@
 class UCommonActivatableWidget;
 class UUserWidget;
 
-USTRUCT(BlueprintType, meta=(Category="UI"))
+USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FEstActivateWidgetTaskData
 {
 	GENERATED_BODY()

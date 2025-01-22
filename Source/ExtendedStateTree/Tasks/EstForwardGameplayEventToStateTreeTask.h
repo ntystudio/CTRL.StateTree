@@ -27,7 +27,7 @@ public:
 	FGameplayEventReceivedDelegate EventReceived;
 };
 
-USTRUCT(BlueprintType, meta=(Hidden))
+USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FEstForwardGameplayEventToStateTreeData
 {
 	GENERATED_BODY()

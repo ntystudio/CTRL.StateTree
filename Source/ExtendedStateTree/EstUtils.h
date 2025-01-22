@@ -10,12 +10,12 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "EstUtils.generated.h"
-#define GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, MemberName, DefaultString) \
+#define EST_GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, MemberName, DefaultString) \
 ([&]() -> FText { \
 auto const Path = FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, MemberName)); \
 auto const Source = BindingLookup.GetPropertyBindingSource(Path); \
 FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>(); \
-return Source ? BindingLookup.GetBindingSourceDisplayName(Path) : FText::FromString(DefaultString); \
+return Source ? FText::FromString(FString::Printf(TEXT("<s>{</s>%s<s>}</s>"), *BindingLookup.GetBindingSourceDisplayName(Path).ToString())) : FText::FromString(DefaultString); \
 }())
 UCLASS(DisplayName = "StateTree Utils [EST]", ClassGroup=(EST))
 class EXTENDEDSTATETREE_API UEstUtils : public UBlueprintFunctionLibrary

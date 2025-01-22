@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "StateTreeTaskBase.h"
 
+#include "ExtendedStateTree/Tasks/EstSetActorCollision.h"
 #include "ExtendedStateTree/Tasks/EstStateTreeTaskCommonBase.h"
 
 #include "Templates/SubclassOf.h"
@@ -14,13 +15,16 @@
 
 enum class ESpawnActorCollisionHandlingMethod : uint8;
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FEstSpawnActorData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TSubclassOf<AActor> ActorClass;
+	TSubclassOf<AActor> ActorClass = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	bool bDestroyOnExit = false;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FVector SpawnLocation = FVector::ZeroVector;
@@ -28,29 +32,26 @@ struct FEstSpawnActorData
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FRotator SpawnRotation = FRotator::ZeroRotator;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(AllowPreserveRatio))
 	FVector SpawnScale = FVector::OneVector;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	int32 RandomYaw = 0;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(ClampMin="0", UIMin="0", UIMax="360", ClampMax="360", Delta="5", Units="degrees"))
+	int32 RandomYaw = 360;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	ESpawnActorCollisionHandlingMethod CollisionHandlingMethod;
+	ESpawnActorCollisionHandlingMethod CollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TObjectPtr<AActor> Owner;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(Optional))
+	TObjectPtr<AActor> Owner = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TObjectPtr<APawn> Instigator;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	bool bDestroyOnExit = false;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(Optional))
+	TObjectPtr<APawn> Instigator = nullptr;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Output")
-	TObjectPtr<AActor> SpawnedActor;
+	TObjectPtr<AActor> SpawnedActor = nullptr;
 };
 
-USTRUCT(BlueprintType, DisplayName="Spawn Actor [EST]")
+USTRUCT(BlueprintType, DisplayName="Spawn Actor [EST]", meta=(Category="Actor"))
 struct EXTENDEDSTATETREE_API FEstSpawnActor : public FEstStateTreeTaskCommonBase
 {
 	GENERATED_BODY()
@@ -71,7 +72,7 @@ public:
 
 	virtual FName GetIconName() const override
 	{
-		return FName("GraphEditor.SpawnActor_16x");
+		return FName("EditorStyle|GraphEditor.SpawnActor_16x");
 	}
 
 #endif

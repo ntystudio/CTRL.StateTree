@@ -11,10 +11,14 @@
 
 #include "EstTriggerGameplayEventTask.generated.h"
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FEstTriggerGameplayEventTaskData
 {
 	GENERATED_BODY()
+
+	// not used if event has a target bound
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	TArray<TObjectPtr<AActor>> TargetActors;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(InlineEditConditionToggle))
 	bool bUseEnterGameplayEvent = true;
@@ -27,10 +31,6 @@ struct FEstTriggerGameplayEventTaskData
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(EditCondition="bUseExitGameplayEvent"))
 	FGameplayEventData ExitGameplayEvent;
-
-	// not used if event has a target bound
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TArray<TObjectPtr<AActor>> TargetActors;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bFailIfNotSent = false;
@@ -48,13 +48,19 @@ public:
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 
 #if WITH_EDITOR
-	virtual FText GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text) const override;
+	virtual FText GetDescription(
+		FGuid const& ID,
+		FStateTreeDataView InstanceDataView,
+		IStateTreeBindingLookup const& BindingLookup,
+		EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text
+	) const override;
+
 	virtual FName GetIconName() const override
 	{
 		return FName("EditorStyle|ClassIcon.K2Node_Event");
 	}
 #endif
-	
+
 protected:
 	[[maybe_unused]] bool SendGameplayEvent(FGameplayEventData const& EventData, TArray<AActor*> const& TargetActors) const;
 };

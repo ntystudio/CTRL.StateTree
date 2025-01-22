@@ -63,12 +63,12 @@ FText FEstSpawnActor::GetDescription(FGuid const& ID, FStateTreeDataView const I
 {
 	FString Out = FString::Printf(TEXT("<s>Spawn Actor</s> %s "), *UEstUtils::SymbolStateEnter);
 	FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>();
-	FText const ActorClassName = GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, ActorClass, Data->ActorClass.Get()->GetDisplayNameText().ToString());
+	FText const ActorClassName = EST_GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, ActorClass, Data->ActorClass ? Data->ActorClass.Get()->GetDisplayNameText().ToString() : FString("None"));
 	auto const DestroyOnExitPath = FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, bDestroyOnExit));
 	auto const DestroyOnExitSource = BindingLookup.GetPropertyBindingSource(DestroyOnExitPath);
 	FText const DestroyOnExit = DestroyOnExitSource ? BindingLookup.GetBindingSourceDisplayName(DestroyOnExitPath, Formatting) : FText::GetEmpty();
 	FString const OnExitString = (DestroyOnExitSource || Data->bDestroyOnExit) ? FString::Printf(TEXT(" %s Destroy %s"), *UEstUtils::SymbolStateExit, *DestroyOnExit.ToString()) : FString();
-	FText const LocationText = GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, SpawnLocation, Data->SpawnLocation.ToCompactString());
+	FText const LocationText = EST_GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, SpawnLocation, Data->SpawnLocation.ToCompactString());
 	Out = Out.Append(FString::Printf(TEXT("%s <s>at</s> %s %s"), *ActorClassName.ToString(), *LocationText.ToString(), *OnExitString));
 	return UEstUtils::FormatDescription(Out, Formatting);
 }

@@ -10,7 +10,7 @@
 
 #include "EstPrintTextTask.generated.h"
 
-USTRUCT(BlueprintType, meta=(Hidden))
+USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FEstPrintTextConfig
 {
 	GENERATED_BODY()
@@ -40,7 +40,7 @@ struct FEstPrintTextConfig
 	FName Key = NAME_None;
 };
 
-USTRUCT(BlueprintType, meta=(Category="Debug", Hidden))
+USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FEstPrintTextTaskData
 {
 	GENERATED_BODY()

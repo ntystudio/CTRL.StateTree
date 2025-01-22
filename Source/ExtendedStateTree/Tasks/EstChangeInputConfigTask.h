@@ -8,7 +8,7 @@
 
 #include "EstChangeInputConfigTask.generated.h"
 
-USTRUCT(BlueprintType, meta=(Hidden))
+USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FEstChangeInputConfigTaskData
 {
 	GENERATED_BODY()

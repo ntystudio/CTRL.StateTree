@@ -19,7 +19,10 @@ EStateTreeRunStatus FEstComponentVisibility::EnterState(FStateTreeExecutionConte
 void FEstComponentVisibility::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType const& InstanceData = Context.GetInstanceData(*this);
-	SetTargetVisibility(Context, !InstanceData.bTargetVisibility);
+	if (InstanceData.bRevertOnExit)
+	{
+		SetTargetVisibility(Context, !InstanceData.bTargetVisibility);
+	}
 }
 
 void FEstComponentVisibility::SetTargetVisibility(FStateTreeExecutionContext& Context, bool const bNewVisibility) const
@@ -34,9 +37,17 @@ void FEstComponentVisibility::SetTargetVisibility(FStateTreeExecutionContext& Co
 FText FEstComponentVisibility::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Out = TEXT("<s>Set Component Visibility</s> ");
-	FText const SceneComponentName = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, SceneComponent)), Formatting);
-	FText const TargetStateText = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, bTargetVisibility)), Formatting);
-	Out = Out.Append(FString::Printf(TEXT("%s<s>:</s> %s"), *SceneComponentName.ToString(), *TargetStateText.ToString()));
+	FText const SceneComponentName = EST_GET_BINDING_TEXT(ID,  InstanceDataView, BindingLookup, Formatting, SceneComponent, Data->SceneComponent ? Data->SceneComponent.GetName() : FString("None"));
+	auto const& Data = InstanceDataView.GetPtr<FInstanceDataType>();
+	FText const TargetStateText = EST_GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, bTargetVisibility, FString(Data->bTargetVisibility ? TEXT("Visible") : TEXT("Hidden")));
+	auto const Source = BindingLookup.GetPropertyBindingSource(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, bTargetVisibility)));
+	FString const NotTargetStateString = FString::Printf(
+		TEXT("%s%s"),
+		Source ? TEXT("!") : TEXT(""),
+		*EST_GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, bTargetVisibility, !Data->bTargetVisibility ? TEXT("Visible") : TEXT("Hidden")).ToString()
+	);
+	FString const ExitString = Data->bRevertOnExit ? FString::Printf(TEXT("%s<s>:</s> %s"), *UEstUtils::SymbolStateExit, *NotTargetStateString) : TEXT("");
+	Out = Out.Append(FString::Printf(TEXT("%s<s>:</s> %s %s %s"), *SceneComponentName.ToString(), *UEstUtils::SymbolStateEnter, *TargetStateText.ToString(), *ExitString)).TrimStartAndEnd();
 	return UEstUtils::FormatDescription(Out, Formatting);
 }
 #endif
@@ -60,9 +71,17 @@ FText FEstComponentVisibilityInGame::GetDescription(
 ) const
 {
 	FString Out = TEXT("<s>Set Component Visibility In-Game</s> ");
-	FText const SceneComponentName = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, SceneComponent)), Formatting);
-	FText const TargetStateText = BindingLookup.GetBindingSourceDisplayName(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, bTargetVisibility)), Formatting);
-	Out += FString::Printf(TEXT("%s<s>:</s> %s"), *SceneComponentName.ToString(), *TargetStateText.ToString());
+	FText const SceneComponentName = EST_GET_BINDING_TEXT(ID,  InstanceDataView, BindingLookup, Formatting, SceneComponent, GetNameSafe(Data->SceneComponent));
+	auto const& Data = InstanceDataView.GetPtr<FInstanceDataType>();
+	FText const TargetStateText = EST_GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, bTargetVisibility, FString(Data->bTargetVisibility ? TEXT("Visible") : TEXT("Hidden")));
+	auto const Source = BindingLookup.GetPropertyBindingSource(FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, bTargetVisibility)));
+	FString const NotTargetStateString = FString::Printf(
+		TEXT("%s%s"),
+		Source ? TEXT("!") : TEXT(""),
+		*EST_GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, bTargetVisibility, !Data->bTargetVisibility ? TEXT("Visible") : TEXT("Hidden")).ToString()
+	);
+	FString const ExitString = Data->bRevertOnExit ? FString::Printf(TEXT("%s<s>:</s> %s"), *UEstUtils::SymbolStateExit, *NotTargetStateString) : TEXT("");
+	Out = Out.Append(FString::Printf(TEXT("%s<s>:</s> %s %s %s"), *SceneComponentName.ToString(), *UEstUtils::SymbolStateEnter, *TargetStateText.ToString(), *ExitString)).TrimStartAndEnd();
 	return UEstUtils::FormatDescription(Out, Formatting);
 }
 #endif

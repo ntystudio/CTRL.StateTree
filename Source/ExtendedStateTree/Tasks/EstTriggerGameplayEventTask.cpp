@@ -68,14 +68,14 @@ FText FEstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDa
 		FStateTreePropertyPath const EventTagPath = UEstUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, EnterGameplayEvent), GET_MEMBER_NAME_CHECKED(FGameplayEventData, EventTag));
 		auto const BindingSource = BindingLookup.GetPropertyBindingSource(EventTagPath);
 		auto const EventTagMsg = BindingSource ? BindingLookup.GetBindingSourceDisplayName(EventTagPath, Formatting).ToString() : Data->EnterGameplayEvent.EventTag.ToString();
-		Out += FString::Printf(TEXT("%s %s "), *UEstUtils::SymbolStateEnter, *EventTagMsg);
+		Out = Out.Append(FString::Printf(TEXT("%s %s "), *UEstUtils::SymbolStateEnter, *EventTagMsg));
 		if (Data->EnterGameplayEvent.Target)
 		{
-			Out += FString::Printf(TEXT("<s>on</s> %s "), *Data->EnterGameplayEvent.Target->GetName());
+			Out = Out.Append(FString::Printf(TEXT("<s>on</s> %s "), *Data->EnterGameplayEvent.Target->GetName()));
 		}
 		else
 		{
-			Out += FString::Printf(TEXT("<s>on</s> %d <s>Actors</s>"), Data->TargetActors.Num());
+			Out = Out.Append(FString::Printf(TEXT("<s>on</s> %d <s>Actors</s>"), Data->TargetActors.Num()));
 		}
 	}
 	if (Data->bUseExitGameplayEvent)
@@ -83,14 +83,14 @@ FText FEstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDa
 		FStateTreePropertyPath const EventTagPath = UEstUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, ExitGameplayEvent), GET_MEMBER_NAME_CHECKED(FGameplayEventData, EventTag));
 		auto const BindingSource = BindingLookup.GetPropertyBindingSource(EventTagPath);
 		auto const EventTagMsg = BindingSource ? BindingLookup.GetBindingSourceDisplayName(EventTagPath, Formatting).ToString() : Data->ExitGameplayEvent.EventTag.ToString();
-		Out += FString::Printf(TEXT("%s %s "), *UEstUtils::SymbolStateExit, *EventTagMsg);
+		Out = Out.Append(FString::Printf(TEXT("%s %s "), *UEstUtils::SymbolStateExit, *EventTagMsg));
 		if (Data->ExitGameplayEvent.Target)
 		{
-			Out += FString::Printf(TEXT("<s>on</s> %s "), *Data->EnterGameplayEvent.Target->GetName());
+			Out = Out.Append(FString::Printf(TEXT("<s>on</s> %s "), *Data->EnterGameplayEvent.Target->GetName()));
 		}
 		else
 		{
-			Out += FString::Printf(TEXT("<s>on</s> %d <s>Actors</s>"), Data->TargetActors.Num());
+			Out = Out.Append(FString::Printf(TEXT("<s>on</s> %d <s>Actors</s>"), Data->TargetActors.Num()));
 		}
 	}
 	return UEstUtils::FormatDescription(Out, Formatting);

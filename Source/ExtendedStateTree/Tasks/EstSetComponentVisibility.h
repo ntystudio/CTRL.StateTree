@@ -15,6 +15,9 @@ struct FEstComponentVisibilityData
 {
 	GENERATED_BODY()
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Input")
+	TObjectPtr<USceneComponent> SceneComponent = nullptr;
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bTargetVisibility = true;
 
@@ -22,10 +25,10 @@ struct FEstComponentVisibilityData
 	bool bPropagateToChildren = false;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TObjectPtr<USceneComponent> SceneComponent;
+	bool bRevertOnExit = false;
 };
 
-USTRUCT(BlueprintType, DisplayName="Set Component Visibility [EST]")
+USTRUCT(BlueprintType, DisplayName="Set Component Visibility [EST]", meta=(Category="Component"))
 struct EXTENDEDSTATETREE_API FEstComponentVisibility : public FEstStateTreeTaskCommonBase
 {
 	GENERATED_BODY()
@@ -59,7 +62,7 @@ USTRUCT(DisplayName="Set Component Visibility In-Game [EST]")
 struct EXTENDEDSTATETREE_API FEstComponentVisibilityInGame : public FEstComponentVisibility
 {
 	GENERATED_BODY()
-	
+
 #if WITH_EDITOR
 	virtual FText GetDescription(
 		FGuid const& ID,
@@ -68,6 +71,7 @@ struct EXTENDEDSTATETREE_API FEstComponentVisibilityInGame : public FEstComponen
 		EStateTreeNodeFormatting Formatting = EStateTreeNodeFormatting::Text
 	) const override;
 #endif
-protected:	
+
+protected:
 	[[maybe_unused]] virtual void SetTargetVisibility(FStateTreeExecutionContext& Context, bool bNewVisibility) const override;
 };
