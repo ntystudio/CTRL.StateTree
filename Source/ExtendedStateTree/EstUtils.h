@@ -10,13 +10,15 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 
 #include "EstUtils.generated.h"
+
 #define EST_GET_BINDING_TEXT(ID, InstanceDataView, BindingLookup, Formatting, MemberName, DefaultString) \
 ([&]() -> FText { \
-auto const Path = FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, MemberName)); \
-auto const Source = BindingLookup.GetPropertyBindingSource(Path); \
-FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>(); \
-return Source ? FText::FromString(FString::Printf(TEXT("<s>{</s>%s<s>}</s>"), *BindingLookup.GetBindingSourceDisplayName(Path).ToString())) : FText::FromString(DefaultString); \
+	auto const Path = FStateTreePropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, MemberName)); \
+	auto const Source = BindingLookup.GetPropertyBindingSource(Path); \
+	FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>(); \
+	return Source ? FText::FromString(FString::Printf(TEXT("<s>{</s>%s<s>}</s>"), *BindingLookup.GetBindingSourceDisplayName(Path).ToString())) : FText::FromString(DefaultString); \
 }())
+
 UCLASS(DisplayName = "StateTree Utils [EST]", ClassGroup=(EST))
 class EXTENDEDSTATETREE_API UEstUtils : public UBlueprintFunctionLibrary
 {
@@ -37,29 +39,29 @@ public:
 	static FString ReplaceRichText(FString const& String, EStateTreeNodeFormatting const Formatting)
 	{
 		auto const BaseString = String
-			.Replace(TEXT("STT_"), TEXT(""))
-			.Replace(TEXT("STT"), TEXT(""));
+		                        .Replace(TEXT("STT_"), TEXT(""))
+		                        .Replace(TEXT("STT"), TEXT(""));
 		if (Formatting == RichText)
 		{
 			// fix up rich text, named closing tags are not supported
 			return BaseString
-				.Replace(TEXT("</b>"), TEXT("</>"))
-				.Replace(TEXT("</s>"), TEXT("</>"));
+			       .Replace(TEXT("</b>"), TEXT("</>"))
+			       .Replace(TEXT("</s>"), TEXT("</>"));
 		}
 
 		if (!BaseString.Contains(TEXT("</s>")) && !BaseString.Contains(TEXT("</b>")))
 		{
 			// probably already formatted
 			return BaseString
-				.Replace(TEXT("<s>"), TEXT(""))
-				.Replace(TEXT("<b>"), TEXT(""))
-				.Replace(TEXT("</>"), TEXT(""));
+			       .Replace(TEXT("<s>"), TEXT(""))
+			       .Replace(TEXT("<b>"), TEXT(""))
+			       .Replace(TEXT("</>"), TEXT(""));
 		}
 		return BaseString
-			.Replace(TEXT("<s>"), TEXT(""))
-			.Replace(TEXT("<b>"), TEXT("\""))
-			.Replace(TEXT("</s>"), TEXT(""))
-			.Replace(TEXT("</b>"), TEXT("\""));
+		       .Replace(TEXT("<s>"), TEXT(""))
+		       .Replace(TEXT("<b>"), TEXT("\""))
+		       .Replace(TEXT("</s>"), TEXT(""))
+		       .Replace(TEXT("</b>"), TEXT("\""));
 	}
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "StateTree")
@@ -107,6 +109,6 @@ public:
 		if (!State) { return FGameplayTag::EmptyTag; }
 		return State->Tag;
 	}
-	
+
 	static FStateTreePropertyPath GetStructPropertyPath(FGuid const& ID, FName A, FName B);
 };

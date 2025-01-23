@@ -27,7 +27,7 @@ struct FEstActivateWidgetTaskData
 	bool bInvertTargetActivationStateOnExit = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Parameter")
-	bool bCompleteOnMatchingActivationState = true;
+	bool bCompleteOnMatchingActivationState = false;
 
 	FDelegateHandle OnActivatedHandle;
 	FDelegateHandle OnDeactivatedHandle;
