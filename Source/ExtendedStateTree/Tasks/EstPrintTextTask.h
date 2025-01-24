@@ -24,6 +24,10 @@ struct FEstPrintTextConfig
 	UPROPERTY(EditAnywhere)
 	bool bPrintToLog = true;
 
+	// include the current state name in the message
+	UPROPERTY(EditAnywhere)
+	bool bPrintStateName = true;
+
 	UPROPERTY(EditAnywhere)
 	FText Prefix = FText::GetEmpty();
 
@@ -45,13 +49,7 @@ struct FEstPrintTextTaskData
 {
 	GENERATED_BODY()
 
-	FEstPrintTextTaskData()
-	{
-		OnEnter.Prefix = FText::FromString("Enter");
-		OnExit.bEnabled = false;
-		OnExit.Prefix = FText::FromString("Exit");
-		OnExit.TextColor = FLinearColor::Yellow;
-	}
+	FEstPrintTextTaskData();
 
 	UPROPERTY(EditAnywhere)
 	FEstPrintTextConfig OnEnter;

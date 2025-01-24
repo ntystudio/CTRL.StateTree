@@ -6,10 +6,17 @@
 #include "StateTreeExecutionContext.h"
 
 #include "Engine/World.h"
-
 #include "ExtendedStateTree/EstUtils.h"
 
 #include "Kismet/KismetSystemLibrary.h"
+
+FEstPrintTextTaskData::FEstPrintTextTaskData()
+{
+	OnEnter.Prefix = FText::FromString(UEstUtils::SymbolStateEnter);
+	OnExit.bEnabled = false;
+	OnExit.Prefix = FText::FromString(UEstUtils::SymbolStateExit);
+	OnExit.TextColor = FLinearColor::Yellow;
+}
 
 EStateTreeRunStatus FEstPrintTextTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
@@ -27,30 +34,37 @@ void FEstPrintTextTask::ExitState(FStateTreeExecutionContext& Context, FStateTre
 void FEstPrintTextTask::Print(FStateTreeExecutionContext& Context, FEstPrintTextConfig const& Config) const
 {
 	if (!Config.bEnabled) return;
-	UKismetSystemLibrary::PrintString(Context.GetWorld(), Config.Prefix.ToString() + Config.Message.ToString(), Config.bPrintToScreen, Config.bPrintToLog, Config.TextColor, Config.Duration);
+	auto Prefix = Config.Prefix.ToString();
+	if (Config.bPrintStateName)
+	{
+		Prefix = Prefix.Append("\n");
+		Prefix = Prefix.Append(Context.GetActiveStateName());
+	}
+	Prefix = Prefix.Append(": ");
+	UKismetSystemLibrary::PrintString(Context.GetWorld(), Prefix + Config.Message.ToString(), Config.bPrintToScreen, Config.bPrintToLog, Config.TextColor, Config.Duration);
 }
 
 #if WITH_EDITOR
 
-FText FEstPrintTextTask::GetDescription(FGuid const& ID, FStateTreeDataView InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
+FText FEstPrintTextTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Result = FString::Printf(TEXT("%s<s>Print Text</s>"), *UEstUtils::SymbolTaskContinuous);
 	auto const& [OnEnter, OnExit] = InstanceDataView.Get<FInstanceDataType>();
 	if (OnEnter.bEnabled)
 	{
-		Result += TEXT(" ");
+		Result = Result.Append(TEXT(" "));
 		FStateTreePropertyPath const Path = UEstUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, OnEnter), GET_MEMBER_NAME_CHECKED(FEstPrintTextConfig, Message));
 		auto const Msg = BindingLookup.GetBindingSourceDisplayName(Path, Formatting).ToString();
-		Result += FString::Printf(TEXT("%s %s %s"), *UEstUtils::SymbolStateEnter, *OnEnter.Prefix.ToString(), *Msg).TrimStartAndEnd();
+		Result = Result.Append(FString::Printf(TEXT("%s %s %s"), *UEstUtils::SymbolStateEnter, *OnEnter.Prefix.ToString(), *Msg).TrimStartAndEnd());
 	}
 	if (OnExit.bEnabled)
 	{
-		Result += TEXT(" ");
+		Result = Result.Append(TEXT(" "));
 		FStateTreePropertyPath const Path = UEstUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, OnExit), GET_MEMBER_NAME_CHECKED(FEstPrintTextConfig, Message));
 		auto const Msg = BindingLookup.GetBindingSourceDisplayName(Path, Formatting).ToString();
-		Result += FString::Printf(TEXT("%s %s %s"), *UEstUtils::SymbolStateExit, *OnExit.Prefix.ToString(), *Msg).TrimStartAndEnd();
+		Result = Result.Append(FString::Printf(TEXT("%s %s %s"), *UEstUtils::SymbolStateExit, *OnExit.Prefix.ToString(), *Msg).TrimStartAndEnd());
 	}
-	
+
 	return UEstUtils::FormatDescription(
 		Result,
 		Formatting
