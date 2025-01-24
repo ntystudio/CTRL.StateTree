@@ -42,8 +42,17 @@ bool FEstTriggerGameplayEventTask::SendGameplayEvent(FGameplayEventData const& E
 	{
 		EST_CLOG(bDebugEnabled, Log, TEXT("Sending Gameplay Event %s to Event Target %s"), *EventData.EventTag.ToString(), *GetNameSafe(EventData.Target));
 		AActor const* Target = EventData.Target;
-		if (!IsValid(Target)) { return false; }
-		if (!IsValid(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Target))) { return false; }
+
+		if (!IsValid(Target))
+		{
+			EST_LOG(Warning, TEXT("Invalid Target Actor"));
+			return false;
+		}
+		if (!IsValid(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Target)))
+		{
+			EST_LOG(Warning, TEXT("Target Actor has no ASC %s"), *GetNameSafe(Target));
+			return false;
+		}
 		UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(const_cast<AActor*>(Target), EventData.EventTag, EventData);
 		return true;
 	}
@@ -64,8 +73,11 @@ FText FEstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDa
 	FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>();
 	if (Data->bUseEnterGameplayEvent)
 	{
-		
-		FStateTreePropertyPath const EventTagPath = UEstUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, EnterGameplayEvent), GET_MEMBER_NAME_CHECKED(FGameplayEventData, EventTag));
+		FStateTreePropertyPath const EventTagPath = UEstUtils::GetStructPropertyPath(
+			ID,
+			GET_MEMBER_NAME_CHECKED(FInstanceDataType, EnterGameplayEvent),
+			GET_MEMBER_NAME_CHECKED(FGameplayEventData, EventTag)
+		);
 		auto const BindingSource = BindingLookup.GetPropertyBindingSource(EventTagPath);
 		auto const EventTagMsg = BindingSource ? BindingLookup.GetBindingSourceDisplayName(EventTagPath, Formatting).ToString() : Data->EnterGameplayEvent.EventTag.ToString();
 		Out = Out.Append(FString::Printf(TEXT("%s %s "), *UEstUtils::SymbolStateEnter, *EventTagMsg));
@@ -80,7 +92,11 @@ FText FEstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDa
 	}
 	if (Data->bUseExitGameplayEvent)
 	{
-		FStateTreePropertyPath const EventTagPath = UEstUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, ExitGameplayEvent), GET_MEMBER_NAME_CHECKED(FGameplayEventData, EventTag));
+		FStateTreePropertyPath const EventTagPath = UEstUtils::GetStructPropertyPath(
+			ID,
+			GET_MEMBER_NAME_CHECKED(FInstanceDataType, ExitGameplayEvent),
+			GET_MEMBER_NAME_CHECKED(FGameplayEventData, EventTag)
+		);
 		auto const BindingSource = BindingLookup.GetPropertyBindingSource(EventTagPath);
 		auto const EventTagMsg = BindingSource ? BindingLookup.GetBindingSourceDisplayName(EventTagPath, Formatting).ToString() : Data->ExitGameplayEvent.EventTag.ToString();
 		Out = Out.Append(FString::Printf(TEXT("%s %s "), *UEstUtils::SymbolStateExit, *EventTagMsg));

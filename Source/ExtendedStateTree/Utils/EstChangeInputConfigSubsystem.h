@@ -139,7 +139,7 @@ struct FEstInputModeConfig
 
 	// Whether to show mouse cursor. Default is true
 	// Used in UIOnly and GameAndUI input modes
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bSetMouseCursor && InputMode != EEstInputMode::GameOnly"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="InputMode != EEstInputMode::GameOnly"))
 	bool bShowMouseCursor = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bShowMouseCursor && InputMode != EEstInputMode::GameOnly"))
