@@ -12,6 +12,7 @@ public class ExtendedStateTree : ModuleRules
 			new string[]
 			{
 				"Core",
+				"CommonUI",
 			}
 			);
 			

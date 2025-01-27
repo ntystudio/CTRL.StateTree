@@ -108,6 +108,64 @@ void UEstChangeInputConfigSubsystem::ScheduleUpdate()
 	UpdateHandle = GetWorld()->GetTimerManager().SetTimerForNextTick(this, &UEstChangeInputConfigSubsystem::Update);
 }
 
+FEstInputModeConfig UEstChangeInputConfigSubsystem::GetInputConfigFromStack() const
+{
+	TOptional<FEstInputModeConfig> InputConfigContext;
+	for (auto const InputConfigHandle : InputConfigHandleStack)
+	{
+		if (!InputConfigHandle.IsValid()) continue;
+		auto const InputConfig = GetInputConfig(InputConfigHandle);
+		if (!InputConfig.IsSet()) continue;
+		if (!InputConfigContext.IsSet())
+		{
+			InputConfigContext = InputConfig;
+			continue;
+		}
+
+		InputConfigContext->InputMode = InputConfig->InputMode;
+		InputConfigContext->bOverrideInputModeDefault = InputConfig->bOverrideInputModeDefault;
+		if (InputConfig->InputMode == EEstInputMode::GameOnly)
+		{
+			InputConfigContext->bFlushInput = InputConfig->bFlushInput;
+		}
+		if (InputConfig->OverridesIgnoreLookInput())
+		{
+			InputConfigContext->IgnoreInputConfig.bOverrideIgnoreLookInput = true;
+			InputConfigContext->IgnoreInputConfig.bIgnoreLookInput = InputConfig->IgnoreLookInput();
+		}
+		if (InputConfig->OverrideIgnoreMoveInput())
+		{
+			InputConfigContext->IgnoreInputConfig.bOverrideIgnoreMoveInput = true;
+			InputConfigContext->IgnoreInputConfig.bIgnoreMoveInput = InputConfig->IgnoreMoveInput();
+		}
+		if (InputConfig->bOverrideInputModeDefault && InputConfig->InputMode != EEstInputMode::GameOnly)
+		{
+			InputConfigContext->bShowMouseCursor = InputConfig->bShowMouseCursor;
+		}
+
+		if (InputConfig->OverridesMouseCursor())
+		{
+			InputConfigContext->bOverrideMouseCursor = true;
+			InputConfigContext->MouseCursor = InputConfig->MouseCursor;
+		}
+
+		if (InputConfig->OverrideMouseCaptureLock())
+		{
+			InputConfigContext->bOverrideMouseCaptureLock = true;
+			InputConfigContext->MouseLockMode = InputConfig->MouseLockMode;
+			InputConfigContext->MouseCaptureMode = InputConfig->MouseCaptureMode;
+			InputConfigContext->bHideCursorDuringCapture = InputConfig->HideCursorDuringCapture();
+		}
+
+		if (InputConfig->InputMode != EEstInputMode::GameOnly)
+		{
+			InputConfigContext->WidgetToFocus = InputConfig->WidgetToFocus;
+		}
+	}
+	if (!InputConfigContext.IsSet()) return {};
+	return InputConfigContext.GetValue();
+}
+
 void UEstChangeInputConfigSubsystem::ApplyInputConfigFromHandle(TOptional<FGuid> InputConfigHandle)
 {
 	auto const LocalPlayer = GetLocalPlayer();
@@ -115,7 +173,6 @@ void UEstChangeInputConfigSubsystem::ApplyInputConfigFromHandle(TOptional<FGuid>
 	auto const PC = LocalPlayer->GetPlayerController(GetWorld());
 	if (!IsValid(PC)) return;
 	if (CurrentInputConfigHandle == InputConfigHandle) { return; } // already applied
-	auto InputConfig = GetInputConfig(InputConfigHandle);
 	CICS_LOG(
 		Verbose,
 		TEXT("ApplyInputConfigFromHandle: Changing Input Config: %s <- %s"),
@@ -123,48 +180,75 @@ void UEstChangeInputConfigSubsystem::ApplyInputConfigFromHandle(TOptional<FGuid>
 		*DescribeHandle(CurrentInputConfigHandle)
 	);
 	CurrentInputConfigHandle = InputConfigHandle;
-	if (!InputConfig)
+	if (!GetInputConfig(InputConfigHandle))
 	{
 		CICS_LOG(Log, TEXT("ApplyInputConfigFromHandle: Empty Input Config"));
-		return;
 	}
-	// // prevent reporting as enqueued
+
+	auto InputConfig = GetInputConfigFromStack();
+
+	if (InputConfig.OverridesIgnoreLookInput())
+	{
+		bool const bIgnoreLookInput = InputConfig.IgnoreLookInput();
+		if (bIsIgnoringLookInput != bIgnoreLookInput)
+		{
+			bIsIgnoringLookInput = bIgnoreLookInput;
+			PC->SetIgnoreLookInput(bIsIgnoringLookInput);
+		}
+	}
+	if (InputConfig.OverrideIgnoreMoveInput())
+	{
+		bool const bIgnoreMoveInput = InputConfig.IgnoreMoveInput();
+		if (bIsIgnoringMoveInput != bIgnoreMoveInput)
+		{
+			bIsIgnoringMoveInput = bIgnoreMoveInput;
+			PC->SetIgnoreMoveInput(bIsIgnoringMoveInput);
+		}
+	}
+
+	auto SetMouseCursor = [InputConfig, PC, LocalPlayer, this]()
+	{
+		if (InputConfig.OverridesMouseCursor())
+		{
+			PC->CurrentMouseCursor = static_cast<EMouseCursor::Type>(InputConfig.MouseCursor);
+		}
+		PC->SetShowMouseCursor(InputConfig.bShowMouseCursor);
+		auto const GameViewportClient = LocalPlayer->ViewportClient;
+		GameViewportClient->SetHideCursorDuringCapture(InputConfig.bHideCursorDuringCapture);
+		GameViewportClient->SetMouseLockMode(InputConfig.MouseLockMode);
+	};
+
+	// prevent reporting as enqueued
 	// EnqueuedInputConfigs.Remove(InputConfigHandle.GetValue());
-	switch (InputConfig->InputMode)
+	switch (InputConfig.InputMode)
 	{
 		case EEstInputMode::GameOnly:
 		{
-			UWidgetBlueprintLibrary::SetInputMode_GameOnly(PC, InputConfig->bFlushInput);
-			auto const GameViewportClient = LocalPlayer->ViewportClient;
-			GameViewportClient->SetMouseLockMode(EMouseLockMode::LockOnCapture);
-			GameViewportClient->SetMouseCaptureMode(EMouseCaptureMode::CapturePermanently);
-			GameViewportClient->SetHideCursorDuringCapture(true);
-			PC->SetShowMouseCursor(false);
-			break;
-		}
-		case EEstInputMode::UIOnly:
-		{
-			UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(PC, InputConfig->WidgetToFocus, InputConfig->MouseLockMode, InputConfig->bFlushInput);
-			if (InputConfig->bSetMouseCursor)
+			UWidgetBlueprintLibrary::SetInputMode_GameOnly(PC, InputConfig.bFlushInput);
+			if (!InputConfig.bOverrideInputModeDefault)
 			{
-				PC->CurrentMouseCursor = static_cast<EMouseCursor::Type>(InputConfig->MouseCursor);
+				PC->SetShowMouseCursor(false);
 			}
-			PC->SetShowMouseCursor(InputConfig->bShowMouseCursor);
+			else
+			{
+				SetMouseCursor();
+			}
 			break;
 		}
 		case EEstInputMode::GameAndUI:
 		{
-			UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PC, InputConfig->WidgetToFocus, InputConfig->MouseLockMode, InputConfig->bHideCursorDuringCapture);
-			if (InputConfig->bSetMouseCursor)
-			{
-				PC->CurrentMouseCursor = static_cast<EMouseCursor::Type>(InputConfig->MouseCursor);
-			}
-			PC->SetShowMouseCursor(InputConfig->bShowMouseCursor);
+			UWidgetBlueprintLibrary::SetInputMode_GameAndUIEx(PC, InputConfig.WidgetToFocus, InputConfig.MouseLockMode, InputConfig.bHideCursorDuringCapture);
+			SetMouseCursor();
+		}
+		case EEstInputMode::UIOnly:
+		{
+			UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(PC, InputConfig.WidgetToFocus, InputConfig.MouseLockMode, InputConfig.bFlushInput);
+			SetMouseCursor();
 			break;
 		}
 		default:
 		{
-			CICS_LOG(Error, TEXT("ApplyInputConfigFromHandle: Unknown InputMode %s"), *UEnum::GetDisplayValueAsText(InputConfig->InputMode).ToString());
+			CICS_LOG(Error, TEXT("ApplyInputConfigFromHandle: Unknown InputMode %s"), *UEnum::GetDisplayValueAsText(InputConfig.InputMode).ToString());
 		}
 	}
 }

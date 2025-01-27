@@ -10,37 +10,65 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(EstChangeInputConfigTask)
 
+FEstInputModeConfig FEstChangeInputConfigTask::GetInputConfig(FInstanceDataType const* InstanceData) const
+{
+	if (InstanceData->bUseInputConfigPreset)
+	{
+		if (IsValid(InstanceData->InputConfigPreset))
+		{
+			return InstanceData->InputConfigPreset->InputConfig;
+		} else {
+			EST_LOG(Error, TEXT("FEstChangeInputConfigTask: InputConfigPreset is invalid %s"), *GetNameSafe(InstanceData->InputConfigPreset));
+			return FEstInputModeConfig();
+		}
+	}
+	 
+	 return InstanceData->InputConfig;
+}
+
 EStateTreeRunStatus FEstChangeInputConfigTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
-	auto& [PlayerController, InputConfig, InputConfigHandle] = Context.GetInstanceData<FEstChangeInputConfigTaskData>(*this);
-	if (!IsValid(PlayerController))
+	auto& InstanceData = Context.GetInstanceData<FEstChangeInputConfigTaskData>(*this);
+	if (!IsValid(InstanceData.PlayerController))
 	{
-		EST_LOG(Error, TEXT("FEstChangeInputConfigTask: PlayerController is invalid %s"), *GetNameSafe(PlayerController));
+		EST_LOG(Error, TEXT("FEstChangeInputConfigTask: PlayerController is invalid %s"), *GetNameSafe(InstanceData.PlayerController));
 		return EStateTreeRunStatus::Failed;
 	}
-	auto const ChangeInputConfigSubsystem = UEstChangeInputConfigSubsystem::Get(PlayerController);
+	auto const ChangeInputConfigSubsystem = UEstChangeInputConfigSubsystem::Get(InstanceData.PlayerController);
 	if (!ensure(ChangeInputConfigSubsystem)) { return EStateTreeRunStatus::Failed; }
-	ensure(!InputConfigHandle.IsSet());
-	InputConfigHandle = ChangeInputConfigSubsystem->PushInputConfig(InputConfig);
+	ensure(!InstanceData.InputConfigHandle.IsSet());
+	auto const InputConfig = GetInputConfig(Context.GetInstanceDataPtr<FEstChangeInputConfigTaskData>(*this));
+	InstanceData.InputConfigHandle = ChangeInputConfigSubsystem->PushInputConfig(InputConfig);
 	return EStateTreeRunStatus::Running;
 }
 
 void FEstChangeInputConfigTask::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
-	auto& [PlayerController, InputConfig, InputConfigHandle] = Context.GetInstanceData<FEstChangeInputConfigTaskData>(*this);
-	if (!InputConfigHandle.IsSet()) { return; }
+	auto& InstanceData = Context.GetInstanceData<FEstChangeInputConfigTaskData>(*this);
+	if (!InstanceData.InputConfigHandle.IsSet()) { return; }
 
 	ON_SCOPE_EXIT
 	{
-		InputConfigHandle.Reset();
+		InstanceData.InputConfigHandle.Reset();
 	};
 
-	auto const ChangeInputConfigSubsystem = UEstChangeInputConfigSubsystem::Get(PlayerController);
+	auto const ChangeInputConfigSubsystem = UEstChangeInputConfigSubsystem::Get(InstanceData.PlayerController);
 	if (!ChangeInputConfigSubsystem) return;
-	auto const Handle = InputConfigHandle.GetValue();
+	auto const Handle = InstanceData.InputConfigHandle.GetValue();
 	ChangeInputConfigSubsystem->PopInputConfig(Handle);
 }
 
+EDataValidationResult FEstChangeInputConfigTask::Compile(FStateTreeDataView const InstanceDataView, TArray<FText>& ValidationMessages)
+{
+	auto SuperResult = Super::Compile(InstanceDataView, ValidationMessages);
+	auto const InstanceData = InstanceDataView.GetPtr<FEstChangeInputConfigTaskData>();
+	if (InstanceData->bUseInputConfigPreset && !IsValid(InstanceData->InputConfigPreset))
+	{
+		SuperResult = EDataValidationResult::Invalid;
+		ValidationMessages.Add(FText::FromString(FString::Printf(TEXT("InputConfigPreset is invalid: %s"), *GetNameSafe(InstanceData->InputConfigPreset))));
+	}
+	return SuperResult;
+}
 #if WITH_EDITOR
 FText FEstChangeInputConfigTask::GetDescription(
 	FGuid const& ID,
@@ -50,12 +78,19 @@ FText FEstChangeInputConfigTask::GetDescription(
 ) const
 {
 	FInstanceDataType const* InstanceData = InstanceDataView.GetPtr<FInstanceDataType>();
-	auto const Result = FString::Printf(
+	
+	auto const InputConfig = GetInputConfig(InstanceData);
+	auto Result = FString::Printf(
 		TEXT("%s <s>Change Input</s> %s <b>%s</b>"),
 		*UEstUtils::SymbolTaskContinuous,
 		*UEstUtils::SymbolStateEnter,
-		*UEnum::GetDisplayValueAsText(InstanceData->InputConfig.InputMode).ToString()
+		*UEnum::GetDisplayValueAsText(InputConfig.InputMode).ToString()
 	);
+	if (InstanceData->bUseInputConfigPreset) 
+	{
+		Result = Result.Append(FString::Printf(TEXT(" <b>(Preset: %s)</b>"), *GetNameSafe(InstanceData->InputConfigPreset)));
+	}
 	return UEstUtils::FormatDescription(Result, Formatting);
 }
+
 #endif

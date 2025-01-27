@@ -16,7 +16,13 @@ struct FEstChangeInputConfigTaskData
 	UPROPERTY(EditAnywhere, Category = "Context")
 	TObjectPtr<APlayerController> PlayerController = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Parameter")
+	UPROPERTY(EditAnywhere, Category = "Parameter", meta=(InlineEditConditionToggle))
+	bool bUseInputConfigPreset = false;
+
+	UPROPERTY(EditAnywhere, Category = "Parameter", meta=(EditCondition="bUseInputConfigPreset"))
+	TObjectPtr<UEstInputConfigPreset> InputConfigPreset = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Parameter", meta=(EditCondition="!bUseInputConfigPreset"))
 	FEstInputModeConfig InputConfig;
 
 	UPROPERTY(Transient)
@@ -30,8 +36,10 @@ struct FEstChangeInputConfigTask : public FEstStateTreeTaskCommonBase
 
 	using FInstanceDataType = FEstChangeInputConfigTaskData;
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
+	FEstInputModeConfig GetInputConfig(FInstanceDataType const* InstanceData) const;
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
+	virtual EDataValidationResult Compile(FStateTreeDataView InstanceDataView, TArray<FText>& ValidationMessages) override;
 
 #if WITH_EDITOR
 	virtual FText GetDescription(

@@ -10,7 +10,7 @@
 
 #include "EstSetComponentVisibility.generated.h"
 
-USTRUCT(BlueprintType)
+USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FEstComponentVisibilityData
 {
 	GENERATED_BODY()

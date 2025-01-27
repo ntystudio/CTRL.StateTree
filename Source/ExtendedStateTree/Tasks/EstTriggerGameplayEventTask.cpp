@@ -66,6 +66,7 @@ bool FEstTriggerGameplayEventTask::SendGameplayEvent(FGameplayEventData const& E
 	}
 	return ValidActors.Num() > 0;
 }
+
 #if WITH_EDITOR
 FText FEstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const
 {
