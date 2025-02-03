@@ -85,8 +85,6 @@ MIT
 
 ----
 
-----
-
 > [!Tip] 
 > # NTY Studio Plugins
 >
