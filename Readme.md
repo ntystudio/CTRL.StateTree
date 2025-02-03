@@ -1,4 +1,4 @@
-﻿# Extended State Tree
+﻿# Use State Tree
 
 This plugin adds a range of useful new state tree utility tasks and property functions.
 
@@ -73,8 +73,8 @@ The project should be placed in your project's `Plugins` folder.
 
 ```bash
 cd YourProject
-git submodule add git@github.com:ntystudio/ExtendedStateTree.git Plugins/ExtendedStateTree
-git commit -m "Added ExtendedStateTree Plugin as a submodule."
+git submodule add git@github.com:ntystudio/UseStateTree.git Plugins/UseStateTree
+git commit -m "Added UseStateTree Plugin as a submodule."
 ```
 
 Alternatively you can download the ZIP of this repo and place it in `YourProject/Plugins/`.
@@ -91,5 +91,5 @@ MIT
 > # NTY Studio Plugins
 >
 > * [� Unicode Browser](https://github.com/ntystudio/UnicodeBrowser)
-> * [Extended State Tree](https://github.com/ntystudio/ExtendedStateTree)
+> * [Use State Tree](https://github.com/ntystudio/UseStateTree)
 > * [Reference Visualizer](https://github.com/ntystudio/CTRL-reference-visualizer)
