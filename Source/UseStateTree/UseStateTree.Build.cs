@@ -7,30 +7,30 @@ public class UseStateTree : ModuleRules
 	public UseStateTree(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
+
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
 				"Core",
 				"CommonUI",
 			}
-			);
-			
-		
+		);
+
+
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CoreUObject",
 				"CommonUI",
+				"CoreUObject",
 				"Engine",
-				"GameplayTags",
 				"GameplayAbilities",
 				"GameplayStateTreeModule",
+				"GameplayTags",
 				"Slate",
 				"SlateCore",
 				"StateTreeModule",
 				"UMG",
 			}
-			);
+		);
 	}
 }
