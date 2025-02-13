@@ -68,7 +68,7 @@ bool FUstTriggerGameplayEventTask::SendGameplayEvent(FGameplayEventData const& E
 }
 
 #if WITH_EDITOR
-FText FUstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting Formatting) const
+FText FUstTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Out = TEXT("<s>Trigger Gameplay Event</s> ");
 	FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>();

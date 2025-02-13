@@ -4,6 +4,8 @@
 
 #include "StateTreePropertyBindings.h"
 
+#include "Components/SceneComponent.h"
+
 #include "UseStateTree/UstUtils.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(UstSetComponentVisibility)

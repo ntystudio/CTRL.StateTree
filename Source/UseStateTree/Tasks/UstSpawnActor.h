@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CoreMinimal.h"
 #include "StateTreeTaskBase.h"
+
+#include "Engine/EngineTypes.h"
 
 #include "Templates/SubclassOf.h"
 
