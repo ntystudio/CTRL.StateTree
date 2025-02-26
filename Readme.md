@@ -90,4 +90,6 @@ MIT
 >
 > * [� Unicode Browser](https://github.com/ntystudio/UnicodeBrowser)
 > * [Use State Tree](https://github.com/ntystudio/UseStateTree)
-> * [Reference Visualizer](https://github.com/ntystudio/CTRL-reference-visualizer)
+> * [CTRL.Reference Visualizer](https://github.com/ntystudio/CTRL.ReferenceVisualizer)
+> * [CTRL.Core](https://github.com/ntystudio/CTRL.Core)
+> * [CTRL.Gas](https://github.com/ntystudio/CTRL.Gas)
