@@ -1,4 +1,4 @@
-﻿# Use State Tree
+﻿# CTRL.StateTree
 
 This plugin adds a range of useful new state tree utility tasks and property functions.
 
