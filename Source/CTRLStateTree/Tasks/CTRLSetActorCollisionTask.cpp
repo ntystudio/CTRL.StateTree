@@ -1,17 +1,17 @@
 ﻿// SPDX-FileCopyrightText: © 2025 NTY.studio
 // SPDX-License-Identifier: MIT
 
-#include "CTRLStateTree/Tasks/CTRLSetActorCollision.h"
+#include "CTRLSetActorCollisionTask.h"
 
 #include "StateTreePropertyBindings.h"
 
-#include "GameFramework/Actor.h"
-
 #include "CTRLStateTree/CTRLStateTreeUtils.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetActorCollision)
+#include "GameFramework/Actor.h"
 
-EStateTreeRunStatus FCTRLSetActorCollision::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetActorCollisionTask)
+
+EStateTreeRunStatus FCTRLSetActorCollisionTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType const& InstanceData = Context.GetInstanceData(*this);
 	if (!InstanceData.Actor) { return EStateTreeRunStatus::Failed; }
@@ -19,7 +19,7 @@ EStateTreeRunStatus FCTRLSetActorCollision::EnterState(FStateTreeExecutionContex
 	return EStateTreeRunStatus::Running;
 }
 
-void FCTRLSetActorCollision::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+void FCTRLSetActorCollisionTask::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType const& InstanceData = Context.GetInstanceData(*this);
 	if (InstanceData.bRevertOnExit)
@@ -29,7 +29,7 @@ void FCTRLSetActorCollision::ExitState(FStateTreeExecutionContext& Context, FSta
 }
 
 #if WITH_EDITOR
-FText FCTRLSetActorCollision::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
+FText FCTRLSetActorCollisionTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Out = TEXT("<s>Set Actor Collision</s> ");
 	FText const ActorName = CTRLST_GET_BINDING_TEXT(ID,  InstanceDataView, BindingLookup, Formatting, Actor, GetNameSafe(Data->Actor));

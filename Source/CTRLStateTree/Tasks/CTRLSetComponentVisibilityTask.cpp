@@ -1,17 +1,17 @@
 ﻿// SPDX-FileCopyrightText: © 2025 NTY.studio
 // SPDX-License-Identifier: MIT
 
-#include "CTRLStateTree/Tasks/CTRLSetComponentVisibility.h"
+#include "CTRLStateTree/Tasks/CTRLSetComponentVisibilityTask.h"
 
 #include "StateTreePropertyBindings.h"
 
-#include "Components/SceneComponent.h"
-
 #include "CTRLStateTree/CTRLStateTreeUtils.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetComponentVisibility)
+#include "Components/SceneComponent.h"
 
-EStateTreeRunStatus FCTRLComponentVisibility::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetComponentVisibilityTask)
+
+EStateTreeRunStatus FCTRLComponentVisibilityTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType const& InstanceData = Context.GetInstanceData(*this);
 	if (!InstanceData.SceneComponent) { return EStateTreeRunStatus::Failed; }
@@ -19,7 +19,7 @@ EStateTreeRunStatus FCTRLComponentVisibility::EnterState(FStateTreeExecutionCont
 	return EStateTreeRunStatus::Running;
 }
 
-void FCTRLComponentVisibility::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+void FCTRLComponentVisibilityTask::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType const& InstanceData = Context.GetInstanceData(*this);
 	if (InstanceData.bRevertOnExit)
@@ -28,7 +28,7 @@ void FCTRLComponentVisibility::ExitState(FStateTreeExecutionContext& Context, FS
 	}
 }
 
-void FCTRLComponentVisibility::SetTargetVisibility(FStateTreeExecutionContext& Context, bool const bNewVisibility) const
+void FCTRLComponentVisibilityTask::SetTargetVisibility(FStateTreeExecutionContext& Context, bool const bNewVisibility) const
 {
 	FInstanceDataType const& Data = Context.GetInstanceData(*this);
 
@@ -37,7 +37,7 @@ void FCTRLComponentVisibility::SetTargetVisibility(FStateTreeExecutionContext& C
 }
 
 #if WITH_EDITOR
-FText FCTRLComponentVisibility::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
+FText FCTRLComponentVisibilityTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Out = TEXT("<s>Set Component Visibility</s> ");
 	FText const SceneComponentName = CTRLST_GET_BINDING_TEXT(ID,  InstanceDataView, BindingLookup, Formatting, SceneComponent, Data->SceneComponent ? Data->SceneComponent.GetName() : FString("None"));
@@ -57,7 +57,7 @@ FText FCTRLComponentVisibility::GetDescription(FGuid const& ID, FStateTreeDataVi
 
 //~ ━━━━━━━━━━━━━━━━━━━━━━━━━━ Component Visibility In-Game ━━━━━━━━━━━━━━━━━━━━━━━━━━ //
 
-void FCTRLComponentVisibilityInGame::SetTargetVisibility(FStateTreeExecutionContext& Context, bool const bNewVisibility) const
+void FCTRLComponentVisibilityInGameTask::SetTargetVisibility(FStateTreeExecutionContext& Context, bool const bNewVisibility) const
 {
 	FInstanceDataType const& Data = Context.GetInstanceData(*this);
 
@@ -66,7 +66,7 @@ void FCTRLComponentVisibilityInGame::SetTargetVisibility(FStateTreeExecutionCont
 }
 
 #if WITH_EDITOR
-FText FCTRLComponentVisibilityInGame::GetDescription(
+FText FCTRLComponentVisibilityInGameTask::GetDescription(
 	FGuid const& ID,
 	FStateTreeDataView const InstanceDataView,
 	IStateTreeBindingLookup const& BindingLookup,

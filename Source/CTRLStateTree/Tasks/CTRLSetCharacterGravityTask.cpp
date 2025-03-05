@@ -1,18 +1,18 @@
 ﻿// SPDX-FileCopyrightText: © 2025 NTY.studio
 // SPDX-License-Identifier: MIT
 
-#include "CTRLStateTree/Tasks/CTRLSetCharacterGravity.h"
+#include "CTRLSetCharacterGravityTask.h"
 
 #include "StateTreePropertyBindings.h"
+
+#include "CTRLStateTree/CTRLStateTreeUtils.h"
 
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-#include "CTRLStateTree/CTRLStateTreeUtils.h"
+#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetCharacterGravityTask)
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetCharacterGravity)
-
-EStateTreeRunStatus FCTRLSetCharacterGravity::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+EStateTreeRunStatus FCTRLSetCharacterGravityTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 	if (!InstanceData.Character) { return EStateTreeRunStatus::Failed; }
@@ -21,7 +21,7 @@ EStateTreeRunStatus FCTRLSetCharacterGravity::EnterState(FStateTreeExecutionCont
 	return EStateTreeRunStatus::Running;
 }
 
-void FCTRLSetCharacterGravity::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+void FCTRLSetCharacterGravityTask::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 	if (InstanceData.bRevertOnExit)
@@ -31,7 +31,7 @@ void FCTRLSetCharacterGravity::ExitState(FStateTreeExecutionContext& Context, FS
 }
 
 #if WITH_EDITOR
-FText FCTRLSetCharacterGravity::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
+FText FCTRLSetCharacterGravityTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Out = TEXT("<s>Set Actor Gravity Scale</s> ");
 	auto const& Data = InstanceDataView.GetPtr<FInstanceDataType>();

@@ -6,11 +6,11 @@
 #include "CoreMinimal.h"
 #include "StateTreeTaskBase.h"
 
+#include "CTRLStateTree/Tasks/CTRLStateTreeCommonBaseTask.h"
+
 #include "Engine/EngineTypes.h"
 
 #include "Templates/SubclassOf.h"
-
-#include "CTRLStateTree/Tasks/CTRLStateTreeCommonBaseTask.h"
 
 #include "CTRLSpawnActorTask.generated.h"
 

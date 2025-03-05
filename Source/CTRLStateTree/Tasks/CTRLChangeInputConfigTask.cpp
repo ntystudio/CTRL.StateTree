@@ -11,16 +11,16 @@ FCTRLInputModeConfig FCTRLChangeInputConfigTask::GetInputConfig(FInstanceDataTyp
 {
 	if (InstanceData->bUseInputConfigPreset)
 	{
-		if (IsValid(InstanceData->InputConfigPreset))
+		if (!IsValid(InstanceData->InputConfigPreset))
 		{
-			return InstanceData->InputConfigPreset->InputConfig;
-		} else {
 			CTRLST_LOG(Error, TEXT("FCTRLChangeInputConfigTask: InputConfigPreset is invalid %s"), *GetNameSafe(InstanceData->InputConfigPreset));
 			return FCTRLInputModeConfig();
 		}
+
+		return InstanceData->InputConfigPreset->InputConfig;
 	}
-	 
-	 return InstanceData->InputConfig;
+
+	return InstanceData->InputConfig;
 }
 
 EStateTreeRunStatus FCTRLChangeInputConfigTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
@@ -75,7 +75,7 @@ FText FCTRLChangeInputConfigTask::GetDescription(
 ) const
 {
 	FInstanceDataType const* InstanceData = InstanceDataView.GetPtr<FInstanceDataType>();
-	
+
 	auto const InputConfig = GetInputConfig(InstanceData);
 	auto Result = FString::Printf(
 		TEXT("%s <s>Change Input</s> %s <b>%s</b>"),
@@ -83,7 +83,7 @@ FText FCTRLChangeInputConfigTask::GetDescription(
 		*UCTRLStateTreeUtils::SymbolStateEnter,
 		*UEnum::GetDisplayValueAsText(InputConfig.InputMode).ToString()
 	);
-	if (InstanceData->bUseInputConfigPreset) 
+	if (InstanceData->bUseInputConfigPreset)
 	{
 		Result = Result.Append(FString::Printf(TEXT(" <b>(Preset: %s)</b>"), *GetNameSafe(InstanceData->InputConfigPreset)));
 	}

@@ -11,7 +11,7 @@
 #include "CTRLSetComponentActiveTask.generated.h"
 
 USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
-struct FCTRLComponentActiveData
+struct FCTRLSetComponentActiveTaskData
 {
 	GENERATED_BODY()
 
@@ -35,12 +35,12 @@ struct FCTRLComponentActiveData
 };
 
 USTRUCT(BlueprintType, DisplayName="Set Component Active [CTRL]", meta=(Category="Component", Hidden))
-struct CTRLSTATETREE_API FCTRLComponentActiveTask : public FCTRLStateTreeCommonBaseTask
+struct CTRLSTATETREE_API FCTRLSetComponentActiveTask : public FCTRLStateTreeCommonBaseTask
 {
 	GENERATED_BODY()
 
 public:
-	using FInstanceDataType = FCTRLComponentActiveData;
+	using FInstanceDataType = FCTRLSetComponentActiveTaskData;
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;

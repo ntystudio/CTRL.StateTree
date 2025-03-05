@@ -6,11 +6,11 @@
 #include "PropertyHandle.h"
 #include "StateTreeExecutionContext.h"
 
+#include "CTRLStateTree/CTRLStateTreeUtils.h"
+
 #include "Engine/World.h"
 
 #include "Kismet/KismetSystemLibrary.h"
-
-#include "CTRLStateTree/CTRLStateTreeUtils.h"
 
 FCTRLPrintTextTaskData::FCTRLPrintTextTaskData()
 {
@@ -33,7 +33,7 @@ void FCTRLPrintTextTask::ExitState(FStateTreeExecutionContext& Context, FStateTr
 	Print(Context, OnExit);
 }
 
-void FCTRLPrintTextTask::Print(FStateTreeExecutionContext& Context, FCTRLPrintTextTaskData const& Config) const
+void FCTRLPrintTextTask::Print(FStateTreeExecutionContext& Context, FCTRLPrintTextTaskOnEventConfig const& Config) const
 {
 	if (!Config.bEnabled) return;
 	auto Prefix = Config.Prefix.ToString();
@@ -55,14 +55,14 @@ FText FCTRLPrintTextTask::GetDescription(FGuid const& ID, FStateTreeDataView con
 	if (OnEnter.bEnabled)
 	{
 		Result = Result.Append(TEXT(" "));
-		FStateTreePropertyPath const Path = UCTRLStateTreeUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, OnEnter), GET_MEMBER_NAME_CHECKED(FCTRLPrintTextTaskData, Message));
+		FStateTreePropertyPath const Path = UCTRLStateTreeUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, OnEnter), GET_MEMBER_NAME_CHECKED(FCTRLPrintTextTaskOnEventConfig, Message));
 		auto const Msg = BindingLookup.GetBindingSourceDisplayName(Path, Formatting).ToString();
 		Result = Result.Append(FString::Printf(TEXT("%s %s %s"), *UCTRLStateTreeUtils::SymbolStateEnter, *OnEnter.Prefix.ToString(), *Msg).TrimStartAndEnd());
 	}
 	if (OnExit.bEnabled)
 	{
 		Result = Result.Append(TEXT(" "));
-		FStateTreePropertyPath const Path = UCTRLStateTreeUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, OnExit), GET_MEMBER_NAME_CHECKED(FCTRLPrintTextTaskData, Message));
+		FStateTreePropertyPath const Path = UCTRLStateTreeUtils::GetStructPropertyPath(ID, GET_MEMBER_NAME_CHECKED(FInstanceDataType, OnExit), GET_MEMBER_NAME_CHECKED(FCTRLPrintTextTaskOnEventConfig, Message));
 		auto const Msg = BindingLookup.GetBindingSourceDisplayName(Path, Formatting).ToString();
 		Result = Result.Append(FString::Printf(TEXT("%s %s %s"), *UCTRLStateTreeUtils::SymbolStateExit, *OnExit.Prefix.ToString(), *Msg).TrimStartAndEnd());
 	}

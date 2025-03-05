@@ -8,15 +8,15 @@
 
 #include "Abilities/GameplayAbilityTypes.h"
 
-#include "UObject/Object.h"
-
 #include "CTRLStateTree/Tasks/CTRLStateTreeCommonBaseTask.h"
+
+#include "UObject/Object.h"
 
 #include "CTRLForwardGameplayEventToStateTreeTask.generated.h"
 
 // Task needs a UObject to be able to bind to ASC dynamic multicast delegates
 UCLASS(Hidden)
-class CTRLSTATETREE_API UCTRLEventBridge : public UObject
+class CTRLSTATETREE_API UCTRLStateTreeEventBridge : public UObject
 {
 	GENERATED_BODY()
 
@@ -46,7 +46,7 @@ struct FCTRLForwardGameplayEventToStateTreeData
 	bool bOnlyTriggerOnce = false;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UCTRLEventBridge> Bridge;
+	TObjectPtr<UCTRLStateTreeEventBridge> Bridge;
 
 	FDelegateHandle BridgeDelegateHandle;
 };
@@ -68,7 +68,7 @@ public:
 	virtual EDataValidationResult Compile(FStateTreeDataView InstanceDataView, TArray<FText>& ValidationMessages) override;
 
 protected:
-	UCTRLEventBridge* MakeListener(FStateTreeExecutionContext const& Context) const;
+	UCTRLStateTreeEventBridge* MakeListener(FStateTreeExecutionContext const& Context) const;
 
 public:
 #if WITH_EDITOR

@@ -5,14 +5,14 @@
 
 #include "CoreMinimal.h"
 
-#include "UObject/Object.h"
-
 #include "CTRLStateTree/Tasks/CTRLStateTreeCommonBaseTask.h"
+
+#include "UObject/Object.h"
 
 #include "CTRLPrintTextTask.generated.h"
 
 USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
-struct FCTRLPrintTextTaskData
+struct FCTRLPrintTextTaskOnEventConfig
 {
 	GENERATED_BODY()
 
@@ -53,10 +53,10 @@ struct FCTRLPrintTextTaskData
 	FCTRLPrintTextTaskData();
 
 	UPROPERTY(EditAnywhere)
-	FCTRLPrintTextTaskData OnEnter;
+	FCTRLPrintTextTaskOnEventConfig OnEnter;
 
 	UPROPERTY(EditAnywhere)
-	FCTRLPrintTextTaskData OnExit;
+	FCTRLPrintTextTaskOnEventConfig OnExit;
 };
 
 USTRUCT(BlueprintType, DisplayName="Print Text [CTRL]", meta=(Category="Debug"))
@@ -71,7 +71,7 @@ public:
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 
 protected:
-	virtual void Print(FStateTreeExecutionContext& Context, FCTRLPrintTextTaskData const& Config) const;
+	virtual void Print(FStateTreeExecutionContext& Context, FCTRLPrintTextTaskOnEventConfig const& Config) const;
 
 public:
 #if WITH_EDITOR

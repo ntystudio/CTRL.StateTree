@@ -1,18 +1,18 @@
 ﻿// SPDX-FileCopyrightText: © 2025 NTY.studio
 // SPDX-License-Identifier: MIT
 
-#include "CTRLStateTree/Tasks/CTRLSpawnActor.h"
+#include "CTRLSpawnActorTask.h"
 
 #include "StateTreeExecutionContext.h"
+
+#include "CTRLStateTree/CTRLStateTree.h"
+#include "CTRLStateTree/CTRLStateTreeUtils.h"
 
 #include "Engine/World.h"
 
 #include "Kismet/KismetMathLibrary.h"
 
-#include "CTRLStateTree/CTRLStateTree.h"
-#include "CTRLStateTree/CTRLStateTreeUtils.h"
-
-EStateTreeRunStatus FCTRLSpawnActor::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+EStateTreeRunStatus FCTRLSpawnActorTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 	if (InstanceData.SpawnedActor)
@@ -49,7 +49,7 @@ EStateTreeRunStatus FCTRLSpawnActor::EnterState(FStateTreeExecutionContext& Cont
 	return EStateTreeRunStatus::Running;
 }
 
-void FCTRLSpawnActor::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+void FCTRLSpawnActorTask::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType& InstanceData = Context.GetInstanceData(*this);
 	if (InstanceData.bDestroyOnExit && IsValid(InstanceData.SpawnedActor))
@@ -60,7 +60,7 @@ void FCTRLSpawnActor::ExitState(FStateTreeExecutionContext& Context, FStateTreeT
 	}
 }
 #if WITH_EDITOR
-FText FCTRLSpawnActor::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
+FText FCTRLSpawnActorTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Out = FString::Printf(TEXT("<s>Spawn Actor</s> %s "), *UCTRLStateTreeUtils::SymbolStateEnter);
 	FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>();

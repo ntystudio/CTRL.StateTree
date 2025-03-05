@@ -11,7 +11,7 @@
 #include "CTRLSetComponentVisibilityTask.generated.h"
 
 USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
-struct FCTRLComponentVisibilityData
+struct FCTRLComponentVisibilityTaskData
 {
 	GENERATED_BODY()
 
@@ -34,7 +34,7 @@ struct CTRLSTATETREE_API FCTRLComponentVisibilityTask : public FCTRLStateTreeCom
 	GENERATED_BODY()
 
 public:
-	using FInstanceDataType = FCTRLComponentVisibilityData;
+	using FInstanceDataType = FCTRLComponentVisibilityTaskData;
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
@@ -59,7 +59,7 @@ protected:
 };
 
 USTRUCT(DisplayName="Set Component Visibility In-Game [CTRL]")
-struct CTRLSTATETREE_API FCTRLComponentVisibilityInGameTask : public FCTRLComponentVisibility
+struct CTRLSTATETREE_API FCTRLComponentVisibilityInGameTask : public FCTRLComponentVisibilityTask
 {
 	GENERATED_BODY()
 

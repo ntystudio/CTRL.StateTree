@@ -14,13 +14,13 @@
 
 #define LOCTEXT_NAMESPACE "GameplayEventToStateTreeEventTask"
 
-void UCTRLEventBridge::GameplayEventCallback(FGameplayEventData const* GameplayEventData) const
+void UCTRLStateTreeEventBridge::GameplayEventCallback(FGameplayEventData const* GameplayEventData) const
 {
 	if (!GameplayEventData) { return; }
 	GameplayEventContainerCallback(GameplayEventData->EventTag, GameplayEventData);
 }
 
-void UCTRLEventBridge::GameplayEventContainerCallback(FGameplayTag const GameplayTag, FGameplayEventData const* GameplayEventData) const
+void UCTRLStateTreeEventBridge::GameplayEventContainerCallback(FGameplayTag const GameplayTag, FGameplayEventData const* GameplayEventData) const
 {
 	if (!GameplayEventData || !GameplayTag.IsValid()) { return; }
 	if (EventReceived.IsBound())
@@ -45,7 +45,7 @@ EDataValidationResult FCTRLForwardGameplayEventToStateTreeTask::Compile(FStateTr
 	return Result;
 }
 
-UCTRLEventBridge* FCTRLForwardGameplayEventToStateTreeTask::MakeListener(FStateTreeExecutionContext const& Context) const
+UCTRLStateTreeEventBridge* FCTRLForwardGameplayEventToStateTreeTask::MakeListener(FStateTreeExecutionContext const& Context) const
 {
 	auto& [Actor, EventTag, bOnlyMatchExact, bOnlyTriggerOnce, Listener, DelegateHandle] = Context.GetInstanceData<FInstanceDataType>(*this);
 	if (Listener)
@@ -56,7 +56,7 @@ UCTRLEventBridge* FCTRLForwardGameplayEventToStateTreeTask::MakeListener(FStateT
 	}
 	DelegateHandle.Reset();
 
-	Listener = NewObject<UCTRLEventBridge>();
+	Listener = NewObject<UCTRLStateTreeEventBridge>();
 	Listener->AddToRoot();
 	FStateTreeEventQueue& EventQueue = Context.GetMutableEventQueue();
 	FString MsgPart = FString::Printf(TEXT("%s. Sending → StateTree %s"), *GetNameSafe(Actor), *GetNameSafe(Context.GetStateTree()));
@@ -89,13 +89,13 @@ EStateTreeRunStatus FCTRLForwardGameplayEventToStateTreeTask::EnterState(FStateT
 	{
 		if (bOnlyMatchExact)
 		{
-			DelegateHandle = ASC->GenericGameplayEventCallbacks.FindOrAdd(EventTag).AddUObject(Listener, &UCTRLEventBridge::GameplayEventCallback);
+			DelegateHandle = ASC->GenericGameplayEventCallbacks.FindOrAdd(EventTag).AddUObject(Listener, &UCTRLStateTreeEventBridge::GameplayEventCallback);
 		}
 		else
 		{
 			DelegateHandle = ASC->AddGameplayEventTagContainerDelegate(
 				FGameplayTagContainer(EventTag),
-				FGameplayEventTagMulticastDelegate::FDelegate::CreateUObject(Listener, &UCTRLEventBridge::GameplayEventContainerCallback)
+				FGameplayEventTagMulticastDelegate::FDelegate::CreateUObject(Listener, &UCTRLStateTreeEventBridge::GameplayEventContainerCallback)
 			);
 		}
 		return EStateTreeRunStatus::Running;

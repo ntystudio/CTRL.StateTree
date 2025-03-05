@@ -1,15 +1,15 @@
 ﻿// SPDX-FileCopyrightText: © 2025 NTY.studio
 // SPDX-License-Identifier: MIT
 
-#include "CTRLStateTree/Tasks/CTRLSetComponentActive.h"
+#include "CTRLSetComponentActiveTask.h"
 
 #include "StateTreePropertyBindings.h"
 
 #include "CTRLStateTree/CTRLStateTreeUtils.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetComponentActive)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetComponentActiveTask)
 
-EStateTreeRunStatus FCTRLComponentActive::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+EStateTreeRunStatus FCTRLSetComponentActiveTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType const& InstanceData = Context.GetInstanceData(*this);
 	if (!InstanceData.ActorComponent) { return EStateTreeRunStatus::Failed; }
@@ -17,7 +17,7 @@ EStateTreeRunStatus FCTRLComponentActive::EnterState(FStateTreeExecutionContext&
 	return EStateTreeRunStatus::Running;
 }
 
-void FCTRLComponentActive::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+void FCTRLSetComponentActiveTask::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
 	FInstanceDataType const& InstanceData = Context.GetInstanceData(*this);
 	if (InstanceData.bRevertOnExit)
@@ -27,7 +27,7 @@ void FCTRLComponentActive::ExitState(FStateTreeExecutionContext& Context, FState
 }
 
 #if WITH_EDITOR
-FText FCTRLComponentActive::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
+FText FCTRLSetComponentActiveTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Out = TEXT("<s>Set Component Active</s> ");
 	FText const ComponentName = CTRLST_GET_BINDING_TEXT(ID,  InstanceDataView, BindingLookup, Formatting, ActorComponent, GetNameSafe(Data->ActorComponent));
