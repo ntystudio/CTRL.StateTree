@@ -73,8 +73,8 @@ The project should be placed in your project's `Plugins` folder.
 
 ```bash
 cd YourProject
-git submodule add git@github.com:ntystudio/UseStateTree.git Plugins/UseStateTree
-git commit -m "Added UseStateTree Plugin as a submodule."
+git submodule add git@github.com:ntystudio/CTRL.StateTree.git Plugins/CTRLStateTree
+git commit -m "Added CTRL.StateTree Plugin as a submodule."
 ```
 
 Alternatively you can download the ZIP of this repo and place it in `YourProject/Plugins/`.
@@ -89,7 +89,7 @@ MIT
 > # NTY Studio Plugins
 >
 > * [� Unicode Browser](https://github.com/ntystudio/UnicodeBrowser)
-> * [Use State Tree](https://github.com/ntystudio/UseStateTree)
+> * [CTRL.State Tree](https://github.com/ntystudio/CTRL.StateTree)
 > * [CTRL.Reference Visualizer](https://github.com/ntystudio/CTRL.ReferenceVisualizer)
 > * [CTRL.Core](https://github.com/ntystudio/CTRL.Core)
 > * [CTRL.Gas](https://github.com/ntystudio/CTRL.Gas)
