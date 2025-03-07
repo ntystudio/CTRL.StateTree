@@ -20,12 +20,15 @@ struct FCTRLSetActorGravityData
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Context")
 	TObjectPtr<ACharacter> Character = nullptr;
 
+	// e.g.1.0 for 100% gravity, 0.0 for 0% gravity,  0.5 for 50% gravity, etc 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta=(UIMin="0", UIMax="10", Delta="0.1", Units="Multiplier"))
 	float TargetGravityScale = 0.0f;
+
 	// if true, will revert to the previous gravity scale when exiting the state
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	bool bRevertOnExit = false;
 
+	// stored gravity scale before entering the state
 	UPROPERTY(BlueprintReadWrite, Transient)
 	float PreviousGravityScale = 1.0f;
 };

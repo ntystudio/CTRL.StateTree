@@ -12,7 +12,7 @@
 
 #include "UObject/Object.h"
 
-#include "CTRLForwardGameplayEventToStateTreeTask.generated.h"
+#include "CTRLGasEventToStateTreeEventTask.generated.h"
 
 // Task needs a UObject to be able to bind to ASC dynamic multicast delegates
 UCLASS(Hidden)
@@ -29,15 +29,15 @@ public:
 };
 
 USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
-struct FCTRLForwardGameplayEventToStateTreeData
+struct FCTRLGasEventToStateTreeEventTaskData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Context")
-	TObjectPtr<AActor> Actor;
+	TObjectPtr<AActor> Actor = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	FGameplayTag EventTag;
+	FGameplayTagContainer EventTags;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	bool bOnlyMatchExact = false;
@@ -46,29 +46,31 @@ struct FCTRLForwardGameplayEventToStateTreeData
 	bool bOnlyTriggerOnce = false;
 
 	UPROPERTY(Transient)
-	TObjectPtr<UCTRLStateTreeEventBridge> Bridge;
+	TObjectPtr<UCTRLStateTreeEventBridge> Bridge = nullptr;
 
-	FDelegateHandle BridgeDelegateHandle;
+	TArray<FDelegateHandle> BridgeDelegateHandles;
 };
 
 /*
  * Re-emits Ability System gameplay events from target actor as StateTree events.
  * Useful to set as a global task.
  */
-USTRUCT(BlueprintType, DisplayName="Gameplay → StateTree Event [CTRL]", meta=(Category="Events"))
-struct CTRLSTATETREE_API FCTRLForwardGameplayEventToStateTreeTask : public FCTRLStateTreeCommonBaseTask
+USTRUCT(BlueprintType, DisplayName="GAS Event → StateTree Event [CTRL]", meta=(Category="GAS", Keywords="Gameplay"))
+struct CTRLSTATETREE_API FCTRLGasEventToStateTreeEventTask : public FCTRLStateTreeCommonBaseTask
 {
 	GENERATED_BODY()
 
 public:
-	using FInstanceDataType = FCTRLForwardGameplayEventToStateTreeData;
+	using FInstanceDataType = FCTRLGasEventToStateTreeEventTaskData;
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
+	bool ListenForEvents(FStateTreeExecutionContext const& Context) const;
+	void UnlistenForEvents(FStateTreeExecutionContext const& Context) const;
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual EDataValidationResult Compile(FStateTreeDataView InstanceDataView, TArray<FText>& ValidationMessages) override;
 
 protected:
-	UCTRLStateTreeEventBridge* MakeListener(FStateTreeExecutionContext const& Context) const;
+	UCTRLStateTreeEventBridge* MakeBridge(FStateTreeExecutionContext const& Context) const;
 
 public:
 #if WITH_EDITOR

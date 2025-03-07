@@ -14,6 +14,7 @@ public class CTRLStateTree : ModuleRules
 			{
 				"Core",
 				"CommonUI",
+				"FieldNotification",
 				"StateTreeModule",
 				"GameplayStateTreeModule",
 			}
@@ -34,6 +35,7 @@ public class CTRLStateTree : ModuleRules
 				"SlateCore",
 				"StateTreeModule",
 				"UMG",
+				"ModelViewViewModelBlueprint",
 			}
 		);
 	}

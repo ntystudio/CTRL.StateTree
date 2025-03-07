@@ -10,10 +10,10 @@
 
 #include "CTRLStateTree/Tasks/CTRLStateTreeCommonBaseTask.h"
 
-#include "CTRLTriggerGameplayEventTask.generated.h"
+#include "CTRLGasTriggerEventTask.generated.h"
 
 USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
-struct FCTRLTriggerGameplayEventTaskData
+struct FCTRLGasTriggerEventTaskData
 {
 	GENERATED_BODY()
 
@@ -37,13 +37,13 @@ struct FCTRLTriggerGameplayEventTaskData
 	bool bFailIfNotSent = false;
 };
 
-USTRUCT(BlueprintType, DisplayName="Trigger Gameplay Event [CTRL]", meta=(Category="Events"))
-struct CTRLSTATETREE_API FCTRLTriggerGameplayEventTask : public FCTRLStateTreeCommonBaseTask
+USTRUCT(BlueprintType, DisplayName="Trigger GAS Event [CTRL]", meta=(Category="GAS", Keywords="Gameplay"))
+struct CTRLSTATETREE_API FCTRLGasTriggerEventTask : public FCTRLStateTreeCommonBaseTask
 {
 	GENERATED_BODY()
 
 public:
-	using FInstanceDataType = FCTRLTriggerGameplayEventTaskData;
+	using FInstanceDataType = FCTRLGasTriggerEventTaskData;
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;

@@ -1,7 +1,7 @@
 ﻿// SPDX-FileCopyrightText: © 2025 NTY.studio
 // SPDX-License-Identifier: MIT
 
-#include "CTRLTriggerGameplayEventTask.h"
+#include "CTRLGasTriggerEventTask.h"
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
@@ -11,11 +11,11 @@
 #include "CTRLStateTree/CTRLStateTree.h"
 #include "CTRLStateTree/CTRLStateTreeUtils.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLTriggerGameplayEventTask)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLGasTriggerEventTask)
 
-EStateTreeRunStatus FCTRLTriggerGameplayEventTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+EStateTreeRunStatus FCTRLGasTriggerEventTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
-	auto const Data = Context.GetInstanceData<FCTRLTriggerGameplayEventTaskData>(*this);
+	auto const Data = Context.GetInstanceData<FCTRLGasTriggerEventTaskData>(*this);
 	if (Data.bUseEnterGameplayEvent)
 	{
 		bool const bSent = SendGameplayEvent(Data.EnterGameplayEvent, Data.TargetActors);
@@ -27,9 +27,9 @@ EStateTreeRunStatus FCTRLTriggerGameplayEventTask::EnterState(FStateTreeExecutio
 	return EStateTreeRunStatus::Running;
 }
 
-void FCTRLTriggerGameplayEventTask::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
+void FCTRLGasTriggerEventTask::ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
-	auto const Data = Context.GetInstanceData<FCTRLTriggerGameplayEventTaskData>(*this);
+	auto const Data = Context.GetInstanceData<FCTRLGasTriggerEventTaskData>(*this);
 	if (Data.bUseExitGameplayEvent)
 	{
 		// ReSharper disable once CppExpressionWithoutSideEffects
@@ -37,7 +37,7 @@ void FCTRLTriggerGameplayEventTask::ExitState(FStateTreeExecutionContext& Contex
 	}
 }
 
-bool FCTRLTriggerGameplayEventTask::SendGameplayEvent(FGameplayEventData const& EventData, TArray<AActor*> const& TargetActors) const
+bool FCTRLGasTriggerEventTask::SendGameplayEvent(FGameplayEventData const& EventData, TArray<AActor*> const& TargetActors) const
 {
 	if (EventData.Target)
 	{
@@ -69,7 +69,7 @@ bool FCTRLTriggerGameplayEventTask::SendGameplayEvent(FGameplayEventData const& 
 }
 
 #if WITH_EDITOR
-FText FCTRLTriggerGameplayEventTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
+FText FCTRLGasTriggerEventTask::GetDescription(FGuid const& ID, FStateTreeDataView const InstanceDataView, IStateTreeBindingLookup const& BindingLookup, EStateTreeNodeFormatting const Formatting) const
 {
 	FString Out = TEXT("<s>Trigger Gameplay Event</s> ");
 	FInstanceDataType const* Data = InstanceDataView.GetPtr<FInstanceDataType>();

@@ -10,24 +10,26 @@
 
 #include "UObject/Object.h"
 
-#include "CTRLPlayerStateTreeSchema.generated.h"
+#include "CTRLPawnStateTreeSchema.generated.h"
 
-namespace UST::PlayerStateTree::Names
+namespace UST::PawnStateTree::Names
 {
 	FName const ControllerActor = TEXT("ControllerActor");
 	FName const PawnActor = TEXT("PawnActor");
+	FName const OwnerActor = TEXT("OwnerActor");
 }
 
-UCLASS(BlueprintType, EditInlineNew, CollapseCategories, meta = (DisplayName = "Player State Tree [CTRL]", CommonSchema))
-class CTRLSTATETREE_API UCTRLPlayerStateTreeSchema : public UStateTreeSchema
+UCLASS(BlueprintType, EditInlineNew, CollapseCategories, meta = (DisplayName = "Pawn State Tree Schema [CTRL]", CommonSchema))
+class CTRLSTATETREE_API UCTRLPawnStateTreeSchema : public UStateTreeSchema
 {
 	GENERATED_BODY()
 
 public:
-	UCTRLPlayerStateTreeSchema();
+	UCTRLPawnStateTreeSchema();
 
 	UClass* GetControllerActorClass() const;
 	UClass* GetPawnActorClass() const;
+	UClass* GetOwnerActorClass() const;
 
 protected:
 	virtual bool IsStructAllowed(UScriptStruct const* InScriptStruct) const override;
@@ -49,6 +51,10 @@ protected:
 	/** Actor class the StateTree is expected to run on. Allows to bind to specific Actor class' properties. */
 	UPROPERTY(EditAnywhere, Category="Defaults")
 	TSubclassOf<APawn> PawnActorClass;
+
+	/** Actor class the StateTree is expected to run on. Allows to bind to specific Actor class' properties. */
+	UPROPERTY(EditAnywhere, Category="Defaults")
+	TSubclassOf<AActor> OwnerActorClass;
 
 	/** List of named external data required by schema and provided to the state tree through the execution context. */
 	UPROPERTY()

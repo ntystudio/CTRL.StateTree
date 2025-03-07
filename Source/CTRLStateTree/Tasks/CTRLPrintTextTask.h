@@ -7,8 +7,6 @@
 
 #include "CTRLStateTree/Tasks/CTRLStateTreeCommonBaseTask.h"
 
-#include "UObject/Object.h"
-
 #include "CTRLPrintTextTask.generated.h"
 
 USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))

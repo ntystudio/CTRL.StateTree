@@ -4,35 +4,34 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "StateTreeTaskBase.h"
 
 #include "CTRLStateTree/Tasks/CTRLStateTreeCommonBaseTask.h"
 
-#include "CTRLSetActorCollisionTask.generated.h"
+#include "CTRLAssignWidgetComponentTask.generated.h"
 
-USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
-struct FCTRLSetActorCollisionData
+class UUserWidget;
+class UWidgetComponent;
+
+USTRUCT(meta=(Hidden, Category="Internal"))
+struct CTRLSTATETREE_API FCTRLAssignWidgetComponentTaskData
 {
 	GENERATED_BODY()
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UUserWidget> Widget;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category="Context")
-	TObjectPtr<AActor> Actor;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	bool bTargetCollisionEnabled = true;
-
-	// If true when exiting the state, the component active state will be set to the opposite of the target state
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	bool bRevertOnExit = false;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UWidgetComponent> WidgetComponent;
 };
 
-USTRUCT(BlueprintType, DisplayName="Set Actor Collision [CTRL]", meta=(Category="Actor"))
-struct CTRLSTATETREE_API FCTRLSetActorCollisionTask : public FCTRLStateTreeCommonBaseTask
+/**
+ * 
+ */
+USTRUCT(BlueprintType, DisplayName="Assign Widget to Component [CTRL]", meta=(Category="UI"))
+struct CTRLSTATETREE_API FCTRLAssignWidgetComponentTask : public FCTRLStateTreeCommonBaseTask
 {
 	GENERATED_BODY()
+	using FInstanceDataType = FCTRLAssignWidgetComponentTaskData;
 
-public:
-	using FInstanceDataType = FCTRLSetActorCollisionData;
 	virtual UStruct const* GetInstanceDataType() const override { return FInstanceDataType::StaticStruct(); }
 	virtual EStateTreeRunStatus EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
 	virtual void ExitState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const override;
@@ -47,7 +46,7 @@ public:
 
 	virtual FName GetIconName() const override
 	{
-		return FName("EditorStyle|ShowFlagsMenu.Collision");
+		return FName("EditorStyle|Icons.Visibility");
 	}
 
 #endif
