@@ -18,9 +18,9 @@ UCTRLPawnStateTreeSchema::UCTRLPawnStateTreeSchema():
 	OwnerActorClass(AActor::StaticClass()),
 	ContextDataDescs(
 		{
-			{UST::PawnStateTree::Names::ControllerActor, AController::StaticClass(), FGuid(0x89926642, 0x4C2EC33E, 0xE72E4296, 0x45D15029)},
-			{UST::PawnStateTree::Names::PawnActor, APawn::StaticClass(), FGuid(0xDFB93B9E, 0xEDBE4906, 0x851C66B2, 0x7585FA21)},
-			{UST::PawnStateTree::Names::OwnerActor, AActor::StaticClass(), FGuid(0xFAF5E70D, 0x4EF92F9F, 0xE6172D9D, 0xF71BFA47)},
+			{CTRL::PawnStateTree::Names::ControllerActor, AController::StaticClass(), FGuid(0x89926642, 0x4C2EC33E, 0xE72E4296, 0x45D15029)},
+			{CTRL::PawnStateTree::Names::PawnActor, APawn::StaticClass(), FGuid(0xDFB93B9E, 0xEDBE4906, 0x851C66B2, 0x7585FA21)},
+			{CTRL::PawnStateTree::Names::OwnerActor, AActor::StaticClass(), FGuid(0xFAF5E70D, 0x4EF92F9F, 0xE6172D9D, 0xF71BFA47)},
 		}
 	) {}
 UClass* UCTRLPawnStateTreeSchema::GetControllerActorClass() const

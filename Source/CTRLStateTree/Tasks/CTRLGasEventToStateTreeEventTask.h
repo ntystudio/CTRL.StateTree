@@ -34,7 +34,7 @@ struct FCTRLGasEventToStateTreeEventTaskData
 	GENERATED_BODY()
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category="Context")
-	TObjectPtr<AActor> Actor = nullptr;
+	TWeakObjectPtr<AActor> Actor = nullptr;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	FGameplayTagContainer EventTags;

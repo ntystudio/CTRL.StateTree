@@ -27,15 +27,16 @@ public class CTRLStateTree : ModuleRules
 				"AIModule",
 				"CommonUI",
 				"CoreUObject",
+				"CTRLCore",
 				"Engine",
 				"GameplayAbilities",
 				"GameplayStateTreeModule",
 				"GameplayTags",
+				"ModelViewViewModelBlueprint",
 				"Slate",
 				"SlateCore",
 				"StateTreeModule",
 				"UMG",
-				"ModelViewViewModelBlueprint",
 			}
 		);
 	}

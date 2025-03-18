@@ -15,6 +15,8 @@
 
 #include "Subsystems/LocalPlayerSubsystem.h"
 
+#include "Templates/TypeHash.h"
+
 #include "CTRLChangeInputConfigSubsystem.generated.h"
 
 class UUserWidget;
@@ -159,6 +161,14 @@ struct CTRLSTATETREE_API FCTRLIgnoreInputConfig
 			*LexToString(bIgnoreLookInput)
 		);
 	}
+
+	friend uint32 GetTypeHash(FCTRLIgnoreInputConfig const& Arg)
+	{
+		uint32 Hash = HashCombine(GetTypeHash(Arg.bOverrideIgnoreMoveInput), GetTypeHash(Arg.bIgnoreMoveInput));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.bOverrideIgnoreLookInput));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.bIgnoreLookInput));
+		return Hash;
+	}
 };
 
 /*
@@ -173,15 +183,14 @@ struct CTRLSTATETREE_API FCTRLInputModeConfig
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ECTRLInputMode InputMode = ECTRLInputMode::GameOnly;
 
+	// Whether to flush input. Default is true
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay)
+	bool bFlushInput = true;
+
 	// Whether to override the default cursor settings for the input mode. Default is false
 	// e.g. if false, won't show cursor (or cursor options) for GameOnly mode
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bOverrideInputModeDefault = false;
-
-	// Whether to flush input. Default is true
-	// Used in GameOnly and GameAndUI input modes
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="InputMode != ECTRLInputMode::GameAndUI"))
-	bool bFlushInput = true;
 
 	// Whether to ignore Player look/move input
 	// Only used if InputMode is not UIOnly
@@ -198,28 +207,34 @@ struct CTRLSTATETREE_API FCTRLInputModeConfig
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bShowMouseCursor && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
 	bool bOverrideMouseCursor = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bShowMouseCursor && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
+	bool CenterMouseOnSet = false;
+
 	// Hardware mouse cursor to use. Requires bShowMouseCursor
 	// Used in GameAndUI & UIOnly input modes unless bOverrideInputModeDefault is true
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bShowMouseCursor && bOverrideMouseCursor && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
 	ECTRLMouseCursor MouseCursor = ECTRLMouseCursor::Default;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly"))
-	bool bOverrideMouseCaptureLock = false;
+	bool bOverrideMouseLock = false;
 
 	// Mouse lock mode to use. Default is LockAlways
 	// Used in GameAndUI and UIOnly input modes, unless bOverrideInputModeDefault is true
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="bOverrideMouseCaptureLock && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="bOverrideMouseLock && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
 	EMouseLockMode MouseLockMode = EMouseLockMode::LockAlways;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(EditCondition="bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly"))
+	bool bOverrideMouseCapture = false;
 
 	// Mouse capture mode to use. Default is CapturePermanently
 	// Used in GameAndUI and UIOnly input modes, unless bOverrideInputModeDefault is true
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="bOverrideMouseCaptureLock && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="bOverrideMouseCapture && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
 	EMouseCaptureMode MouseCaptureMode = EMouseCaptureMode::CapturePermanently;
 
 	// Whether to hide cursor during capture. Default is false
 	// Note option is not normally available for UIOnly input mode, but we expose it here
 	// Used in GameAndUI and UIOnly input modes, unless bOverrideInputModeDefault is true
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="bOverrideMouseCaptureLock && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="bOverrideMouseCapture && (bOverrideInputModeDefault || InputMode != ECTRLInputMode::GameOnly)"))
 	bool bHideCursorDuringCapture = false;
 
 	// Optional Widget to focus on mode change. Default is nullptr.
@@ -230,24 +245,46 @@ struct CTRLSTATETREE_API FCTRLInputModeConfig
 	friend bool operator==(FCTRLInputModeConfig const& Lhs, FCTRLInputModeConfig const& RHS)
 	{
 		return Lhs.InputMode == RHS.InputMode
-			&& Lhs.bOverrideInputModeDefault == RHS.bOverrideInputModeDefault
 			&& Lhs.bFlushInput == RHS.bFlushInput
+			&& Lhs.bOverrideInputModeDefault == RHS.bOverrideInputModeDefault
 			&& Lhs.IgnoreInputConfig == RHS.IgnoreInputConfig
 			&& Lhs.bShowMouseCursor == RHS.bShowMouseCursor
 			&& Lhs.bOverrideMouseCursor == RHS.bOverrideMouseCursor
 			&& Lhs.MouseCursor == RHS.MouseCursor
-			&& Lhs.bOverrideMouseCaptureLock == RHS.bOverrideMouseCaptureLock
+			&& Lhs.CenterMouseOnSet == RHS.CenterMouseOnSet
+			&& Lhs.bOverrideMouseCapture == RHS.bOverrideMouseCapture
+			&& Lhs.bOverrideMouseLock == RHS.bOverrideMouseLock
 			&& Lhs.MouseLockMode == RHS.MouseLockMode
 			&& Lhs.MouseCaptureMode == RHS.MouseCaptureMode
 			&& Lhs.bHideCursorDuringCapture == RHS.bHideCursorDuringCapture
 			&& Lhs.WidgetToFocus == RHS.WidgetToFocus;
 	}
 
+	friend bool operator!=(FCTRLInputModeConfig const& Lhs, FCTRLInputModeConfig const& RHS) { return !(Lhs == RHS); }
+
+	friend uint32 GetTypeHash(FCTRLInputModeConfig const& Arg)
+	{
+		uint32 Hash = HashCombine(GetTypeHash(Arg.InputMode), GetTypeHash(Arg.bFlushInput));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.bOverrideInputModeDefault));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.IgnoreInputConfig));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.bShowMouseCursor));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.bOverrideMouseCursor));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.MouseCursor));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.CenterMouseOnSet));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.bOverrideMouseCapture));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.bOverrideMouseLock));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.MouseLockMode));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.MouseCaptureMode));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.bHideCursorDuringCapture));
+		Hash = HashCombine(Hash, GetTypeHash(Arg.WidgetToFocus));
+		return Hash;
+	}
+
 	FString ToString() const
 	{
 		return FString::Printf(
 			TEXT(
-				"FCTRLInputModeConfig({\nInputMode=%s,\r\tbOverrideInputModeDefault=%s,\r\tbFlushInput=%s,\r\tIgnoreInputConfig=%s,\r\tbShowMouseCursor=%s,\r\tbOverrideMouseCursor=%s,\r\tMouseCursor=%s,\r\tbOverrideMouseCaptureLock=%s,\r\tMouseLockMode=%s,\r\tMouseCaptureMode=%s,\r\tbHideCursorDuringCapture=%s,\r\tWidgetToFocus=%s\r})"
+				"FCTRLInputModeConfig({\nInputMode=%s,\r\tbOverrideInputModeDefault=%s,\r\tbFlushInput=%s,\r\tIgnoreInputConfig=%s,\r\tbShowMouseCursor=%s,\r\tbOverrideMouseCursor=%s,\r\tMouseCursor=%s,\r\tbOverrideMouseLock=%s,\r\tMouseLockMode=%s,\r\tbOverrideMouseCapture=%s,\r\tMouseCaptureMode=%s,\r\tbHideCursorDuringCapture=%s,\r\tWidgetToFocus=%s\r})"
 			),
 			*UEnum::GetValueAsString(InputMode),
 			*LexToString(bOverrideInputModeDefault),
@@ -256,58 +293,48 @@ struct CTRLSTATETREE_API FCTRLInputModeConfig
 			*LexToString(bShowMouseCursor),
 			*LexToString(bOverrideMouseCursor),
 			*UEnum::GetValueAsString(MouseCursor),
-			*LexToString(bOverrideMouseCaptureLock),
+			*LexToString(bOverrideMouseLock),
 			*UEnum::GetValueAsString(MouseLockMode),
+			*LexToString(bOverrideMouseCapture),
 			*UEnum::GetValueAsString(MouseCaptureMode),
 			*LexToString(bHideCursorDuringCapture),
 			*GetNameSafe(WidgetToFocus)
 		);
 	}
 
-	friend bool operator!=(FCTRLInputModeConfig const& Lhs, FCTRLInputModeConfig const& RHS) { return !(Lhs == RHS); }
+	bool SetsShowMouseCursor() const
+	{
+		if (!bOverrideInputModeDefault) return false;
+		return true;
+	}
 
 	bool ShowMouseCursor() const
 	{
-		if (!bOverrideInputModeDefault && InputMode == ECTRLInputMode::GameOnly)
-		{
-			return false;
-		}
+		if (!bOverrideInputModeDefault) return false;
 		return bShowMouseCursor;
 	}
 
 	bool OverridesMouseCursor() const
 	{
-		if (!bOverrideInputModeDefault && InputMode == ECTRLInputMode::GameOnly)
-		{
-			return false;
-		}
-		return ShowMouseCursor() && bOverrideMouseCursor;
+		if (!bOverrideInputModeDefault) return false;
+		return bOverrideMouseCursor;
 	}
 
 	bool HideCursorDuringCapture() const
 	{
-		if (!bOverrideInputModeDefault && InputMode == ECTRLInputMode::GameOnly)
-		{
-			return false;
-		}
+		if (!bOverrideInputModeDefault) return false;
 		return bHideCursorDuringCapture;
 	}
 
 	bool IgnoreMoveInput() const
 	{
-		if (!bOverrideInputModeDefault && InputMode == ECTRLInputMode::UIOnly)
-		{
-			return false;
-		}
+		if (!bOverrideInputModeDefault) return false;
 		return IgnoreInputConfig.IgnoreMoveInput();
 	}
 
 	bool OverrideIgnoreMoveInput() const
 	{
-		if (!bOverrideInputModeDefault && InputMode == ECTRLInputMode::UIOnly)
-		{
-			return false;
-		}
+		if (!bOverrideInputModeDefault) return false;
 		return IgnoreInputConfig.bOverrideIgnoreMoveInput;
 	}
 
@@ -318,20 +345,20 @@ struct CTRLSTATETREE_API FCTRLInputModeConfig
 
 	bool OverridesIgnoreLookInput() const
 	{
-		if (!bOverrideInputModeDefault && InputMode == ECTRLInputMode::UIOnly)
-		{
-			return false;
-		}
+		if (!bOverrideInputModeDefault) return false;
 		return IgnoreInputConfig.bOverrideIgnoreLookInput;
 	}
 
-	bool OverrideMouseCaptureLock() const
+	bool OverrideMouseCapture() const
 	{
-		if (!bOverrideInputModeDefault && InputMode == ECTRLInputMode::GameOnly)
-		{
-			return false;
-		}
-		return bOverrideMouseCaptureLock;
+		if (!bOverrideInputModeDefault) return false;
+		return bOverrideMouseCapture;
+	}
+
+	bool OverrideMouseLock() const
+	{
+		if (!bOverrideInputModeDefault) return false;
+		return bOverrideMouseLock;
 	}
 };
 
@@ -344,10 +371,10 @@ public:
 	UCTRLInputConfigPreset()
 	{
 		DebugName = GetClass()->GetDisplayNameText().ToString()
-		                      .Replace(TEXT("_"), TEXT(" "))
-		                      .Replace(TEXT("Input Config Preset"), TEXT(""))
-		                      .Replace(TEXT("CTRL"), TEXT(""), ESearchCase::CaseSensitive)
-		                      .Replace(TEXT("UST"), TEXT(""), ESearchCase::CaseSensitive);
+			.Replace(TEXT("_"), TEXT(" "))
+			.Replace(TEXT("Input Config Preset"), TEXT(""))
+			.Replace(TEXT("CTRL"), TEXT(""), ESearchCase::CaseSensitive)
+			.Replace(TEXT("UST"), TEXT(""), ESearchCase::CaseSensitive);
 	}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -412,10 +439,11 @@ public:
 	TOptional<FGuid> PeekInputConfigStack() const;
 
 	FString DescribeHandle(TOptional<FGuid> InputConfigHandle) const;
+	FGuid GetNextGuid(FCTRLInputModeConfig const& InputConfig) const;
 
 	virtual void Deinitialize() override;
 
-	// builds the input config from the stack
+	// Builds the input config from the stack
 	// e.g.
 	// if the stack is {A, B, C}
 	// if A & C set a Mouse Cursor, but B does not, when C is removed, A's MouseCursor is inherited
@@ -423,8 +451,9 @@ public:
 	FCTRLInputModeConfig GetInputConfigFromStack() const;
 
 protected:
+	FTimerHandle ScheduledUpdateHandle;
 	void ScheduleUpdate();
 	void Update();
 	void ApplyInputConfigFromHandle(TOptional<FGuid> InputConfigHandle);
-	FTimerHandle UpdateHandle;
+	void InternalSetMouseCursor(FCTRLInputModeConfig const& InputConfig) const;
 };

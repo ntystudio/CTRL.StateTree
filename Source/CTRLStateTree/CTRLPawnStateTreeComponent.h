@@ -16,7 +16,6 @@ class CTRLSTATETREE_API UCTRLPawnStateTreeComponent : public UStateTreeComponent
 	GENERATED_BODY()
 
 public:
-
 	UCTRLPawnStateTreeComponent()
 	{
 		OwnerActor = nullptr;
@@ -35,6 +34,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category="State Tree")
 	void SetController(AController* InControllerActor);
+	UFUNCTION()
+	void OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn);
 	virtual void SetController_Implementation(AController* InControllerActor);
 	void AssignContextActors();
 	virtual void StartLogic() override;
@@ -58,6 +59,9 @@ public:
 	// if true, the component will try to set the controller and pawn from the owner actor (if it is a controller or pawn)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="State Tree")
 	bool bAutoSetupPawnControllerFromOwner = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="State Tree")
+	bool bRestartLogicOnPossessedPawnChanged = true;
 
 	virtual bool SetContextRequirements(FStateTreeExecutionContext& StateTreeContext, bool bLogErrors) override;
 };

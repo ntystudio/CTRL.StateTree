@@ -103,6 +103,15 @@ bool UCTRLPawnStateTreeComponent::ValidateSchema(FStateTreeExecutionContext cons
 	return true;
 }
 
+void UCTRLPawnStateTreeComponent::OnPossessedPawnChanged(APawn* OldPawn, APawn* NewPawn)
+{
+	PawnActor = NewPawn;
+	if (bRestartLogicOnPossessedPawnChanged)
+	{
+		RestartLogic();
+	}
+}
+
 void UCTRLPawnStateTreeComponent::SetController_Implementation(AController* InControllerActor)
 {
 	if (bAutoSetupPawnControllerFromOwner)
@@ -116,6 +125,7 @@ void UCTRLPawnStateTreeComponent::SetController_Implementation(AController* InCo
 		return;
 	}
 	PawnActor = ControllerActor->GetPawn();
+	ControllerActor->OnPossessedPawnChanged.AddUniqueDynamic(this, &ThisClass::OnPossessedPawnChanged);
 }
 
 void UCTRLPawnStateTreeComponent::AssignContextActors()
@@ -139,18 +149,13 @@ void UCTRLPawnStateTreeComponent::AssignContextActors()
 		if (!IsValid(ControllerActor))
 		{
 			SetController(Cast<AController>(OwnerActor));
-			if (auto const Controller = Cast<AController>(OwnerActor))
-			{
-				ControllerActor = Controller;
-				PawnActor = Controller->GetPawn();
-			}
 		}
 		if (!IsValid(PawnActor))
 		{
 			if (auto const Pawn = Cast<APawn>(OwnerActor))
 			{
+				SetController(Pawn->GetController());
 				PawnActor = Pawn;
-				ControllerActor = Pawn->GetController();
 			}
 		}
 	}
@@ -191,13 +196,13 @@ bool UCTRLPawnStateTreeComponent::SetContextRequirements(FStateTreeExecutionCont
 
 	if (!ValidateSchema(StateTreeContext)) { return false; }
 
-	if (!StateTreeContext.SetContextDataByName(UST::PawnStateTree::Names::OwnerActor, FStateTreeDataView(OwnerActor)))
+	if (!StateTreeContext.SetContextDataByName(CTRL::PawnStateTree::Names::OwnerActor, FStateTreeDataView(OwnerActor)))
 	{
 		CTRLST_LOG(Warning, TEXT("Failed to set context requirements. OwnerActor is not valid."));
 		return false;
 	}
 
-	if (!StateTreeContext.SetContextDataByName(UST::PawnStateTree::Names::ControllerActor, FStateTreeDataView(ControllerActor)))
+	if (!StateTreeContext.SetContextDataByName(CTRL::PawnStateTree::Names::ControllerActor, FStateTreeDataView(ControllerActor)))
 	{
 		if (bRequiresController)
 		{
@@ -211,7 +216,7 @@ bool UCTRLPawnStateTreeComponent::SetContextRequirements(FStateTreeExecutionCont
 		}
 	}
 
-	if (!StateTreeContext.SetContextDataByName(UST::PawnStateTree::Names::PawnActor, FStateTreeDataView(PawnActor)))
+	if (!StateTreeContext.SetContextDataByName(CTRL::PawnStateTree::Names::PawnActor, FStateTreeDataView(PawnActor)))
 	{
 		if (bRequiresPawn)
 		{
@@ -221,9 +226,9 @@ bool UCTRLPawnStateTreeComponent::SetContextRequirements(FStateTreeExecutionCont
 		}
 	}
 
-	// StateTreeContext.SetContextDataByName(UST::PawnStateTree::Names::ControllerActor, FStateTreeDataView(ControllerActor));
-	// StateTreeContext.SetContextDataByName(UST::PawnStateTree::Names::PawnActor, FStateTreeDataView(PawnActor));
-	// StateTreeContext.SetContextDataByName(UST::PawnStateTree::Names::OwnerActor, FStateTreeDataView(OwnerActor));
+	// StateTreeContext.SetContextDataByName(CTRL::PawnStateTree::Names::ControllerActor, FStateTreeDataView(ControllerActor));
+	// StateTreeContext.SetContextDataByName(CTRL::PawnStateTree::Names::PawnActor, FStateTreeDataView(PawnActor));
+	// StateTreeContext.SetContextDataByName(CTRL::PawnStateTree::Names::OwnerActor, FStateTreeDataView(OwnerActor));
 	// auto StInstanceData = StateTreeContext.GetInstanceData();
 	// CTRLST_LOG(Warning, TEXT("SetContextRequirements InstanceData CardStacks UID: %d"), StInstanceData->GetObject(2)->GetUniqueID());
 

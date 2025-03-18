@@ -12,7 +12,7 @@
 
 #include "CTRLPawnStateTreeSchema.generated.h"
 
-namespace UST::PawnStateTree::Names
+namespace CTRL::PawnStateTree::Names
 {
 	FName const ControllerActor = TEXT("ControllerActor");
 	FName const PawnActor = TEXT("PawnActor");

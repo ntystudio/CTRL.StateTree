@@ -10,6 +10,8 @@
 #include "CTRLStateTree/CTRLStateTree.h"
 #include "CTRLStateTree/CTRLStateTreeUtils.h"
 
+#include "Engine/World.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLGasEventToStateTreeEventTask)
 
 #define LOCTEXT_NAMESPACE "GameplayEventToStateTreeEventTask"
@@ -48,9 +50,11 @@ EDataValidationResult FCTRLGasEventToStateTreeEventTask::Compile(FStateTreeDataV
 
 UCTRLStateTreeEventBridge* FCTRLGasEventToStateTreeEventTask::MakeBridge(FStateTreeExecutionContext const& Context) const
 {
+	auto World = Context.GetWorld();
+	if (!World) { return nullptr; }
 	auto& Data = Context.GetInstanceData<FInstanceDataType>(*this);
+	if (!Data.Actor.IsValid()) { return nullptr; }
 	auto Bridge = Data.Bridge;
-	auto const Actor = Data.Actor;
 	if (Bridge)
 	{
 		Bridge->EventReceived.Unbind();
@@ -58,10 +62,23 @@ UCTRLStateTreeEventBridge* FCTRLGasEventToStateTreeEventTask::MakeBridge(FStateT
 		Bridge = nullptr;
 	}
 
-	Bridge = NewObject<UCTRLStateTreeEventBridge>(Context.GetOwner(), NAME_None, RF_Transient);
-	Bridge->AddToRoot();
+	auto const Actor = Data.Actor;
+	Bridge = NewObject<UCTRLStateTreeEventBridge>(Data.Actor.Get(), NAME_None, RF_Transient);
+	
+	// Data.OnActorDestroyedHandle = World->AddOnActorDestroyedHandler(FOnActorDestroyed::FDelegate::CreateWeakLambda(
+ //        Actor.Get(),
+ //        [&Data](AActor* DestroyedActor)
+ //        {
+ //        	if (!Data.Bridge) return;
+ //        	if (DestroyedActor == Data.Bridge->GetOuter())
+ //        	{
+	// 				Data.Bridge->EventReceived.Unbind();
+	// 				Data.Bridge = nullptr;
+ //        	}
+ //        }
+ //    ));
 	FStateTreeEventQueue& EventQueue = Context.GetMutableEventQueue();
-	FString MsgPart = FString::Printf(TEXT("%s. Sending → StateTree %s"), *GetNameSafe(Actor), *GetNameSafe(Context.GetStateTree()));
+	FString MsgPart = FString::Printf(TEXT("%s. Sending → StateTree %s"), *GetNameSafe(Actor.Get()), *GetNameSafe(Context.GetStateTree()));
 	Bridge->EventReceived.BindWeakLambda(
 		Actor.Get(),
 		[bDebugEnabled = bDebugEnabled, InstanceDataRef = Context.GetInstanceDataStructRef(*this), &EventQueue, Owner = Context.GetOwner(), MsgPart](FGameplayEventData Payload)
@@ -99,7 +116,8 @@ bool FCTRLGasEventToStateTreeEventTask::ListenForEvents(FStateTreeExecutionConte
 	UnlistenForEvents(Context);
 	auto& Data = Context.GetInstanceData<FInstanceDataType>(*this);
 	auto& [Actor, EventTags, bOnlyMatchExact, bOnlyTriggerOnce, Bridge, DelegateHandles] = Data;
-	if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor))
+	if (!Actor.IsValid()) return false;
+	if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor.Get()))
 	{
 		if (Data.bOnlyMatchExact)
 		{
@@ -133,28 +151,31 @@ void FCTRLGasEventToStateTreeEventTask::UnlistenForEvents(FStateTreeExecutionCon
 {
 	auto& Data = Context.GetInstanceData<FInstanceDataType>(*this);
 	auto& [Actor, EventTags, bOnlyMatchExact, bOnlyTriggerOnce, Bridge, DelegateHandles] = Data;
-	if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor))
+	if (Actor.IsValid())
 	{
-		if (Data.bOnlyMatchExact)
+		if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor.Get()))
 		{
-			for (auto const& EventTag : EventTags)
+			if (Data.bOnlyMatchExact)
+			{
+				for (auto const& EventTag : EventTags)
+				{
+					for (auto const& DelegateHandle : DelegateHandles)
+					{
+						if (!DelegateHandle.IsValid()) continue;
+						if (ASC->GenericGameplayEventCallbacks.Contains(EventTag))
+						{
+							ASC->GenericGameplayEventCallbacks.FindRef(EventTag).Remove(DelegateHandle);
+						}
+					}
+				}
+			}
+			else
 			{
 				for (auto const& DelegateHandle : DelegateHandles)
 				{
 					if (!DelegateHandle.IsValid()) continue;
-					if (ASC->GenericGameplayEventCallbacks.Contains(EventTag))
-					{
-						ASC->GenericGameplayEventCallbacks.FindRef(EventTag).Remove(DelegateHandle);
-					}
+					ASC->RemoveGameplayEventTagContainerDelegate(EventTags, DelegateHandle);
 				}
-			}
-		}
-		else
-		{
-			for (auto const& DelegateHandle : DelegateHandles)
-			{
-				if (!DelegateHandle.IsValid()) continue;
-				ASC->RemoveGameplayEventTagContainerDelegate(EventTags, DelegateHandle);
 			}
 		}
 	}
@@ -168,7 +189,6 @@ void FCTRLGasEventToStateTreeEventTask::ExitState(FStateTreeExecutionContext& Co
 	if (auto const Bridge = Data.Bridge)
 	{
 		Bridge->EventReceived.Unbind();
-		Bridge->RemoveFromRoot();
 		Data.Bridge = nullptr;
 	}
 }

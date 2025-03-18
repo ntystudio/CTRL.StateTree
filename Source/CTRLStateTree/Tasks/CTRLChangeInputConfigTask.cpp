@@ -25,6 +25,12 @@ FCTRLInputModeConfig FCTRLChangeInputConfigTask::GetInputConfig(FInstanceDataTyp
 
 EStateTreeRunStatus FCTRLChangeInputConfigTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const
 {
+	if (!IsValid(Context.GetWorld()) || Context.GetWorld()->IsBeingCleanedUp())
+	{
+		CTRLST_LOG(Warning, TEXT("FCTRLChangeInputConfigTask EnterState: World being cleaned up"));
+		return EStateTreeRunStatus::Failed;
+	}
+
 	auto& InstanceData = Context.GetInstanceData<FCTRLChangeInputConfigTaskData>(*this);
 	if (!IsValid(InstanceData.PlayerController))
 	{
@@ -32,7 +38,7 @@ EStateTreeRunStatus FCTRLChangeInputConfigTask::EnterState(FStateTreeExecutionCo
 		return EStateTreeRunStatus::Failed;
 	}
 	auto const ChangeInputConfigSubsystem = UCTRLChangeInputConfigSubsystem::Get(InstanceData.PlayerController);
-	if (!ensure(ChangeInputConfigSubsystem)) { return EStateTreeRunStatus::Failed; }
+	if (!ChangeInputConfigSubsystem) { return EStateTreeRunStatus::Failed; }
 	ensure(!InstanceData.InputConfigHandle.IsSet());
 	auto const InputConfig = GetInputConfig(Context.GetInstanceDataPtr<FCTRLChangeInputConfigTaskData>(*this));
 	InstanceData.InputConfigHandle = ChangeInputConfigSubsystem->PushInputConfig(InputConfig);
@@ -48,6 +54,12 @@ void FCTRLChangeInputConfigTask::ExitState(FStateTreeExecutionContext& Context, 
 	{
 		InstanceData.InputConfigHandle.Reset();
 	};
+
+	if (!IsValid(Context.GetWorld()) || Context.GetWorld()->IsBeingCleanedUp())
+	{
+		CTRLST_LOG(Warning, TEXT("FCTRLChangeInputConfigTask ExitState: World being cleaned up"));
+		return;
+	}
 
 	auto const ChangeInputConfigSubsystem = UCTRLChangeInputConfigSubsystem::Get(InstanceData.PlayerController);
 	if (!ChangeInputConfigSubsystem) return;
