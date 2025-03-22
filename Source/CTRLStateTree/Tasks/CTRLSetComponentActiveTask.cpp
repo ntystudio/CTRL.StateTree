@@ -7,6 +7,8 @@
 
 #include "CTRLStateTree/CTRLStateTreeUtils.h"
 
+#include "Components/ActorComponent.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CTRLSetComponentActiveTask)
 
 EStateTreeRunStatus FCTRLSetComponentActiveTask::EnterState(FStateTreeExecutionContext& Context, FStateTreeTransitionResult const& Transition) const

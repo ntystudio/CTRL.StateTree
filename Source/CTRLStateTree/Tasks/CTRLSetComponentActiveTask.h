@@ -10,6 +10,8 @@
 
 #include "CTRLSetComponentActiveTask.generated.h"
 
+class UActorComponent;
+
 USTRUCT(BlueprintType, meta=(Hidden, Category="Internal"))
 struct FCTRLSetComponentActiveTaskData
 {
